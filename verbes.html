@@ -1,0 +1,2395 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Verbes">
+<meta name="application-name" content="Verbes">
+<meta name="theme-color" content="#3a7d44" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0c0f" media="(prefers-color-scheme: dark)">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" type="image/png" href="verbes_icon.png">
+<title>Verbes</title>
+<style>
+:root {
+  --bg: #0a0c0f;
+  --bg-elev: #1e222a;
+  --bg-soft: #2a2f38;
+  --ink: #e6e8ec;
+  --ink-soft: #8b919a;
+  --ink-faint: #555b66;
+  --line: #2a2f38;
+  --primary: #3a7d44;
+  --primary-deep: #2d6335;
+  --primary-soft: rgba(58, 125, 68, 0.18);
+  --primary-light: #6dd58c;
+  --purple: #af52de;
+  --red: #ff3b30;
+  --green: #34c759;
+  --green-dark: #1a5c28;
+  --gold: #f0a500;
+  --amber: #f0a500;
+  --blue: #5b8aff;
+}
+@supports (color: color(display-p3 0 0 0)) {
+  :root {
+    --primary: color(display-p3 0.22 0.49 0.27);
+    --primary-light: color(display-p3 0.43 0.84 0.55);
+  }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  height: 100%; width: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.app {
+  max-width: 500px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.screen {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+.screen.active { display: flex; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  min-height: 48px;
+  flex-shrink: 0;
+}
+.topbar h2 {
+  position: absolute;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  pointer-events: none;
+}
+.icon-btn {
+  background: none; border: none;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; cursor: pointer;
+  color: var(--primary-light);
+  font-size: 22px;
+  transition: background 0.15s;
+  -webkit-appearance: none; padding: 0;
+}
+.icon-btn:active { background: var(--bg-soft); }
+.icon-btn svg { width: 22px; height: 22px; stroke-width: 2; }
+
+/* HOME */
+.home {
+  padding: 0 20px 20px;
+  display: flex; flex-direction: column; align-items: center;
+  flex: 1; justify-content: flex-start; gap: 0; overflow: hidden;
+}
+.home-head { text-align: center; margin: 4px 0 0; flex-shrink: 0; }
+.home-head h1 {
+  font-size: 26px; font-weight: 700; letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.home-head .subtitle {
+  font-size: 13px; color: var(--ink-soft); margin-top: 0; letter-spacing: 0.02em;
+}
+.circle-nav-wrap {
+  width: 100%; flex: 1 1 auto;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 0;
+}
+.circle-nav {
+  position: relative;
+  width: min(85vw, 360px); height: min(85vw, 360px);
+}
+.circle-nav svg { width: 100%; height: 100%; }
+.circle-start {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56.25%; height: 56.25%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  color: #fff; border: none;
+  font-family: inherit; font-size: 22px; font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(58, 125, 68, 0.4);
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+.circle-start:active {
+  transform: translate(-50%, -50%) scale(0.96);
+  box-shadow: 0 2px 12px rgba(58, 125, 68, 0.3);
+}
+
+/* SESSION */
+.session { flex: 1; display: flex; flex-direction: column; padding: 0 16px 16px; }
+.session-progress { padding: 0 4px; margin-bottom: 4px; }
+.session-progress-bar {
+  height: 4px; background: var(--bg-soft); border-radius: 2px; overflow: hidden;
+}
+.session-progress-fill {
+  height: 100%; background: var(--primary-light); border-radius: 2px;
+  transition: width 0.3s;
+}
+.session-meta {
+  display: flex; justify-content: space-between; padding: 0 4px;
+  font-size: 12px; color: var(--ink-soft); margin-bottom: 12px;
+}
+
+/* CARD AREA - MULTIPLE CHOICE */
+.card-area { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.mc-card {
+  background: var(--bg-elev);
+  border-radius: 16px; border: 1px solid var(--line);
+  padding: 24px 20px 20px;
+  display: flex; flex-direction: column; gap: 12px;
+  transition: opacity 0.3s;
+}
+.mc-tag-row { display: flex; gap: 8px; }
+.mc-tag {
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 20px; background: var(--bg-soft); color: var(--ink-soft);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.mc-tag.fr-nl { background: var(--primary-soft); color: var(--primary-light); }
+.mc-tag.nl-fr { background: rgba(175,82,222,0.18); color: var(--purple); }
+.mc-tag.mix { background: rgba(91,138,255,0.18); color: var(--blue); }
+.mc-tag.new { background: rgba(52,199,89,0.18); color: var(--green); }
+.mc-tag.review { background: rgba(255,204,0,0.18); color: #ffcc00; }
+
+.mc-question {
+  text-align: center; padding: 8px 0;
+}
+.mc-verb {
+  font-size: 28px; font-weight: 700; color: var(--ink);
+  margin-bottom: 4px; line-height: 1.2;
+}
+.mc-verb .spelling-hl { color: var(--amber); }
+.mc-tense {
+  font-size: 14px; color: var(--ink-soft); font-style: italic;
+}
+.mc-example {
+  font-size: 13px; color: var(--ink-faint); text-align: center;
+  line-height: 1.4; padding: 0 8px;
+}
+.mc-example .nl { display: block; margin-top: 2px; }
+
+/* ANSWER BUTTONS */
+.mc-options {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-top: 8px;
+}
+.mc-opt {
+  background: var(--bg-soft);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 12px;
+  font-family: inherit;
+  font-size: 17px; font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-appearance: none;
+  text-align: center;
+  min-height: 52px;
+  display: flex; align-items: center; justify-content: center;
+}
+.mc-opt:active { transform: scale(0.97); }
+.mc-opt.correct {
+  background: rgba(52,199,89,0.2); border-color: var(--green); color: var(--green);
+}
+.mc-opt.wrong {
+  background: rgba(255,59,48,0.2); border-color: var(--red); color: var(--red);
+}
+.mc-opt.reveal-correct {
+  border-color: var(--green); color: var(--green);
+}
+.mc-opt.disabled { pointer-events: none; opacity: 0.5; }
+
+/* FEEDBACK SECTION */
+.mc-feedback {
+  display: none;
+  background: var(--bg-soft);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 8px;
+  animation: feedbackIn 0.3s ease;
+}
+@keyframes feedbackIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
+.mc-feedback.show { display: block; }
+.mc-feedback-title {
+  font-size: 15px; font-weight: 700; margin-bottom: 4px;
+}
+.mc-feedback-title.ok { color: var(--green); }
+.mc-feedback-title.fail { color: var(--red); }
+.mc-feedback-rule {
+  font-size: 12px; color: var(--ink-soft); line-height: 1.4;
+}
+.mc-next-btn {
+  width: 100%;
+  background: var(--primary);
+  border: none; border-radius: 12px;
+  padding: 14px;
+  font-family: inherit; font-size: 16px; font-weight: 600;
+  color: #fff; cursor: pointer;
+  margin-top: 10px;
+  transition: transform 0.1s;
+}
+.mc-next-btn:active { transform: scale(0.97); }
+
+/* SUMMARY */
+.summary {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.summary-card {
+  background: var(--bg-elev);
+  border-radius: 20px; border: 1px solid var(--line);
+  padding: 32px 24px;
+  width: 100%; text-align: center;
+}
+.summary-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.summary-quote { font-size: 14px; color: var(--ink-soft); margin-bottom: 24px; line-height: 1.4; }
+.stats-grid { display: flex; gap: 12px; justify-content: center; }
+.stat-card {
+  background: var(--bg-soft); border-radius: 12px; padding: 12px 16px;
+  flex: 1; text-align: center;
+}
+.stat-num { font-size: 24px; font-weight: 700; }
+.stat-lab { font-size: 11px; color: var(--ink-soft); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+.stat-card.good .stat-num { color: var(--green); }
+.stat-card.bad .stat-num { color: var(--red); }
+.stat-card.full .stat-num { color: var(--primary-light); }
+.summary-actions { margin-top: 24px; width: 100%; }
+
+/* BUTTONS */
+.btn-primary {
+  display: block; width: 100%;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  border: none; border-radius: 14px;
+  padding: 16px; font-family: inherit;
+  font-size: 17px; font-weight: 600; color: #fff;
+  cursor: pointer; transition: transform 0.1s;
+}
+.btn-primary:active { transform: scale(0.97); }
+.btn-secondary {
+  display: block; width: 100%;
+  background: var(--bg-elev);
+  border: 1px solid var(--line); border-radius: 14px;
+  padding: 14px; font-family: inherit;
+  font-size: 15px; font-weight: 500;
+  color: var(--primary-light);
+  cursor: pointer; margin-top: 10px;
+}
+.btn-secondary:active { background: var(--bg-soft); }
+
+/* CELEBRATION */
+.celebration { text-align: center; }
+.celebration h2 { font-size: 24px; margin: 16px 0 8px; }
+.celebration p { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+
+/* SETTINGS */
+.settings { padding: 0 16px; flex: 1; }
+.settings-section { margin-bottom: 24px; }
+.settings-section h3 { font-size: 13px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; padding: 0 4px; }
+.settings-list { background: var(--bg-elev); border-radius: 12px; overflow: hidden; }
+.settings-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 16px; border: none; background: none;
+  width: 100%; font-family: inherit; font-size: 15px;
+  color: var(--ink); cursor: pointer; border-bottom: 1px solid var(--line);
+  -webkit-appearance: none; text-align: left;
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row:active { background: var(--bg-soft); }
+.settings-row.danger { color: var(--red); }
+.settings-row .arrow { color: var(--ink-faint); }
+.settings-row .arrow svg { width: 18px; height: 18px; stroke-width: 2; }
+
+/* TENSE INFO SCREEN */
+.tense-info {
+  padding: 20px 16px; flex: 1; overflow-y: auto;
+}
+.tense-info h2 {
+  font-size: 22px; font-weight: 700; margin-bottom: 12px;
+  color: var(--primary-light);
+}
+.tense-info .usage {
+  font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 16px;
+}
+.tense-info .rule-box {
+  background: var(--bg-elev); border-radius: 12px; padding: 16px;
+  border-left: 3px solid var(--primary-light); margin-bottom: 16px;
+}
+.tense-info .rule-box .rule-title {
+  font-size: 12px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
+}
+.tense-info .rule-box .rule-text {
+  font-size: 15px; color: var(--ink); font-weight: 500;
+}
+.tense-info .example-box {
+  background: var(--bg-soft); border-radius: 12px; padding: 14px 16px;
+}
+.tense-info .example-fr {
+  font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 4px;
+}
+.tense-info .example-nl {
+  font-size: 13px; color: var(--ink-soft); font-style: italic;
+}
+
+/* BLOCK TEST */
+.block-test-intro {
+  padding: 24px 20px; flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+}
+.block-test-intro h2 { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+.block-test-intro p { font-size: 14px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 24px; max-width: 300px; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 80px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-elev); color: var(--ink);
+  padding: 10px 20px; border-radius: 10px;
+  font-size: 14px; font-weight: 500;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* CONFETTI */
+.confetti-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 9999;
+}
+
+/* PHASE PROGRESS BARS */
+.phase-dir-row { display: flex; align-items: center; gap: 8px; }
+.phase-dir-label { font-size: 12px; color: var(--ink-soft); width: 50px; text-align: right; }
+.phase-bar { height: 6px; background: var(--bg-soft); border-radius: 3px; overflow: hidden; position: relative; }
+.phase-bar-fill { height: 100%; border-radius: 3px; position: absolute; top: 0; left: 0; transition: width 0.5s; }
+.phase-bar-fill.streak { z-index: 2; }
+.phase-bar-fill.streak.fr-nl { background: var(--primary-light); }
+.phase-bar-fill.streak.nl-fr { background: var(--purple); }
+.phase-bar-fill.interval { background: var(--gold); z-index: 1; }
+.phase-dir-count { font-size: 12px; color: var(--ink-faint); width: 40px; }
+
+@media (max-height: 650px) {
+  .mc-verb { font-size: 24px; }
+  .mc-opt { padding: 10px 8px; font-size: 15px; min-height: 44px; }
+  .mc-card { padding: 16px 14px 14px; gap: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HOME -->
+  <div id="screen-home" class="screen active">
+    <div class="topbar">
+      <span></span>
+      <h2></h2>
+      <button class="icon-btn" data-action="open-settings" aria-label="Instellingen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+    </div>
+    <div class="home">
+      <div class="home-head">
+        <h1>Verbes</h1>
+        <div class="subtitle">Werkwoorden Frans</div>
+      </div>
+      <div class="circle-nav-wrap">
+        <div class="circle-nav" id="circle-nav">
+          <svg viewBox="0 0 320 320" id="circle-svg"></svg>
+          <button class="circle-start" id="start-btn" data-action="start">Start</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSION -->
+  <div id="screen-session" class="screen">
+    <div class="topbar">
+      <button class="icon-btn" data-action="abort-session" aria-label="Stop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      <h2 id="session-title">Sessie</h2>
+      <button class="icon-btn" id="tense-info-btn" data-action="show-tense-info" aria-label="Grammatica">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+      </button>
+    </div>
+    <div class="session">
+      <div class="session-progress">
+        <div class="session-progress-bar"><div class="session-progress-fill" id="sess-fill"></div></div>
+      </div>
+      <div class="session-meta">
+        <span id="sess-counter">1 / 25</span>
+        <span id="sess-info"></span>
+      </div>
+      <div class="card-area">
+        <div class="mc-card" id="mc-card">
+          <div class="mc-tag-row">
+            <span class="mc-tag" id="mc-dir-tag">FR→NL</span>
+            <span class="mc-tag" id="mc-type-tag">Nieuw</span>
+          </div>
+          <div class="mc-question">
+            <div class="mc-verb" id="mc-verb"></div>
+            <div class="mc-tense" id="mc-tense"></div>
+          </div>
+          <div class="mc-example" id="mc-example"></div>
+          <div class="mc-options" id="mc-options"></div>
+          <div class="mc-feedback" id="mc-feedback">
+            <div class="mc-feedback-title" id="mc-fb-title"></div>
+            <div class="mc-feedback-rule" id="mc-fb-rule"></div>
+          </div>
+          <button class="mc-next-btn" id="mc-next" style="display:none" data-action="next-card">Volgende</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOCK TEST INTRO -->
+  <div id="screen-block-test" class="screen">
+    <div class="topbar">
+      <button class="icon-btn" data-action="back-home" aria-label="Terug">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <h2>Bloktoets</h2>
+      <span style="width:40px"></span>
+    </div>
+    <div class="block-test-intro">
+      <h2 id="bt-title">Bloktoets</h2>
+      <p id="bt-text">12 kaarten in mix-modus. Je hebt 80% nodig om het volgende blok te ontgrendelen.</p>
+      <button class="btn-primary" data-action="start-block-test">Start toets</button>
+      <button class="btn-secondary" data-action="back-home">Terug</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div id="screen-summary" class="screen">
+    <div class="topbar">
+      <span style="width:40px"></span>
+      <h2>Sessie afgerond</h2>
+      <span style="width:40px"></span>
+    </div>
+    <div class="summary">
+      <div class="summary-card">
+        <div class="summary-title" id="sum-title">Bravo!</div>
+        <div class="summary-quote" id="sum-quote"></div>
+        <div class="stats-grid">
+          <div class="stat-card good"><div class="stat-num" id="sum-good">0</div><div class="stat-lab">Goed</div></div>
+          <div class="stat-card bad"><div class="stat-num" id="sum-bad">0</div><div class="stat-lab">Fout</div></div>
+          <div class="stat-card full"><div class="stat-num" id="sum-cards">0</div><div class="stat-lab">Kaarten</div></div>
+        </div>
+      </div>
+      <div class="summary-actions">
+        <button class="btn-primary" data-action="back-home">Terug naar home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CELEBRATION -->
+  <div id="screen-celebration" class="screen">
+    <div class="topbar">
+      <span style="width:40px"></span>
+      <h2>Mijlpaal!</h2>
+      <span style="width:40px"></span>
+    </div>
+    <div class="summary">
+      <div class="summary-card">
+        <div class="celebration">
+          <h2 id="celeb-title">Blok voltooid!</h2>
+          <p id="celeb-text"></p>
+        </div>
+      </div>
+      <div class="summary-actions">
+        <button class="btn-primary" data-action="continue-from-celeb">Doorgaan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TENSE INFO -->
+  <div id="screen-tense-info" class="screen">
+    <div class="topbar">
+      <button class="icon-btn" data-action="close-tense-info" aria-label="Terug">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <h2>Grammatica</h2>
+      <span style="width:40px"></span>
+    </div>
+    <div class="tense-info" id="tense-info-content"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="screen-settings" class="screen">
+    <div class="topbar">
+      <button class="icon-btn" data-action="back-home" aria-label="Terug">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <h2>Instellingen</h2>
+      <span style="width:40px"></span>
+    </div>
+    <div class="settings">
+      <div class="settings-section">
+        <h3>Voortgang</h3>
+        <div class="settings-list">
+          <button class="settings-row" data-action="export">
+            <span>Backup downloaden</span>
+            <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span>
+          </button>
+          <button class="settings-row" data-action="import">
+            <span>Backup herstellen</span>
+            <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></span>
+          </button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>Gevorderd</h3>
+        <div class="settings-list">
+          <button class="settings-row danger" data-action="reset">
+            <span>Alle voortgang wissen</span>
+            <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="import-file" accept=".json" style="display:none">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ============================================================
+//   CONSTANTS
+// ============================================================
+const STORAGE_KEY = 'verbes_v1_state';
+const SESSION_LENGTH = 25;
+const BLOCK_TEST_LENGTH = 12;
+const BLOCK_TEST_PASS_PCT = 0.8;
+const MASTERY_INTERVAL_DAYS = 21;
+const PHASES_PER_SUB = 6;
+const PERSONS = ['je','tu','il/elle','nous','vous','ils/elles'];
+const PERSON_SHORT = ['je','tu','il','nous','vous','ils'];
+const PERSON_REFL = ['me','te','se','nous','vous','se'];
+
+const QUOTES = [
+  'La pratique rend parfait.',
+  'Petit à petit, l\'oiseau fait son nid.',
+  'C\'est en forgeant qu\'on devient forgeron.',
+  'Chaque jour un peu plus loin.',
+  'Courage, tu progresses!',
+  'La persévérance est la clé du succès.',
+  'Un pas de plus vers la maîtrise!',
+  'Bravo pour ta régularité!',
+];
+
+// ============================================================
+//   TENSE DEFINITIONS
+// ============================================================
+const TENSES = {
+  present:      { label: 'Présent',          short: 'pr' },
+  imparfait:    { label: 'Imparfait',        short: 'im' },
+  futur:        { label: 'Futur simple',     short: 'fu' },
+  conditionnel: { label: 'Conditionnel',     short: 'co' },
+  subjonctif:   { label: 'Subjonctif',       short: 'su' },
+  passeCompose: { label: 'Passé composé',    short: 'pc' },
+  imperatif:    { label: 'Impératif',        short: 'ip' },
+  passeSimple:  { label: 'Passé simple',     short: 'ps' },
+  futProche:    { label: 'Futur proche',     short: 'fp' },
+  partPresent:  { label: 'Participe prés.',  short: 'pp' },
+};
+
+const TENSE_INFO = {
+  present: {
+    title: 'Le présent',
+    usage: 'Je gebruikt de présent als je iets wilt beschrijven in het heden. Het drukt uit wat er nu gebeurt, een gewoonte, of een algemene waarheid.',
+    rule: 'Regelmatig: stam + uitgangen (-e, -es, -e, -ons, -ez, -ent voor -er)',
+    example: { fr: 'Je parle français.', nl: 'Ik spreek Frans.' }
+  },
+  imparfait: {
+    title: 'L\'imparfait',
+    usage: 'Je gebruikt de imparfait als je iets wilt beschrijven uit het verleden: een situatie, gewoonte, of achtergrond. Het is de "beschrijvende verleden tijd".',
+    rule: 'Nous-vorm présent, vervang -ons door: -ais, -ais, -ait, -ions, -iez, -aient',
+    example: { fr: 'Je parlais avec mon ami.', nl: 'Ik praatte met mijn vriend.' }
+  },
+  futur: {
+    title: 'Le futur simple',
+    usage: 'De futur simple gebruik je voor de toekomst, vooral in formele of schriftelijke contexten. In spreektaal gebruik je vaker de futur proche.',
+    rule: 'Hele werkwoord + -ai, -as, -a, -ons, -ez, -ont',
+    example: { fr: 'Je parlerai demain.', nl: 'Ik zal morgen spreken.' }
+  },
+  conditionnel: {
+    title: 'Le conditionnel',
+    usage: 'De conditionnel gebruik je voor beleefdheid, wensen, en voorwaardelijke zinnen ("als... zou"). De uitgangen zijn dezelfde als de imparfait.',
+    rule: 'Hele werkwoord + -ais, -ais, -ait, -ions, -iez, -aient',
+    example: { fr: 'Je voudrais un café.', nl: 'Ik zou graag een koffie willen.' }
+  },
+  subjonctif: {
+    title: 'Le subjonctif',
+    usage: 'De subjonctif gebruik je na uitdrukkingen van wens, twijfel, noodzaak, of emotie. Vaak na "que": il faut que, je veux que, bien que...',
+    rule: 'Ils-vorm présent → stam + -e, -es, -e, -ions, -iez, -ent',
+    example: { fr: 'Il faut que je parle.', nl: 'Ik moet spreken.' }
+  },
+  passeCompose: {
+    title: 'Le passé composé',
+    usage: 'De passé composé gebruik je voor afgeronde acties in het verleden: iets dat begon én eindigde. Het is de "voltooide verleden tijd".',
+    rule: 'Hulpwerkwoord (avoir/être in présent) + voltooid deelwoord',
+    example: { fr: 'J\'ai parlé français.', nl: 'Ik heb Frans gesproken.' }
+  },
+  imperatif: {
+    title: 'L\'impératif',
+    usage: 'De impératif gebruik je om een bevel, verzoek, of aanmoediging te geven. Alleen voor tu, nous, en vous — zonder het onderwerp te noemen.',
+    rule: 'Présent-vorm zonder onderwerp. Bij -er: tu-vorm zonder -s (parle!)',
+    example: { fr: 'Parle français!', nl: 'Spreek Frans!' }
+  },
+  passeSimple: {
+    title: 'Le passé simple',
+    usage: 'De passé simple is een literaire tijd. Je vindt hem in boeken en kranten, maar je gebruikt hem zelf niet in spreektaal. Alleen herkennen is voldoende.',
+    rule: 'Stam + -ai/-as/-a/-âmes/-âtes/-èrent (-er), -is/-it/-îmes/-îtes/-irent (-ir/-re)',
+    example: { fr: 'Il parla longtemps.', nl: 'Hij sprak lang.' }
+  },
+  futProche: {
+    title: 'Le futur proche',
+    usage: 'De futur proche gebruik je voor de nabije toekomst ("ik ga...""). Het is de meest gebruikte toekomsttijd in spreektaal.',
+    rule: 'Aller (présent) + infinitief',
+    example: { fr: 'Je vais parler.', nl: 'Ik ga spreken.' }
+  },
+  partPresent: {
+    title: 'Le participe présent / gérondif',
+    usage: 'Het participe présent beschrijft een gelijktijdige handeling. Het gérondif (en + participe présent) geeft aan "terwijl je...".',
+    rule: 'Nous-vorm présent, vervang -ons door -ant. Gérondif: en + ...ant',
+    example: { fr: 'En parlant, il sourit.', nl: 'Al sprekend glimlachte hij.' }
+  }
+};
+
+// ============================================================
+//   VERB DATA
+// ============================================================
+// Each verb: { inf, nl, type, aux, pp, ppres, conj:{tense:[6 forms]}, imp:[3], block, sub, note, hl }
+// Person order: je, tu, il/elle, nous, vous, ils/elles
+// aux: 'avoir' or 'être' (for passé composé)
+// pp: past participle, ppres: participe présent
+// imp: impératif [tu, nous, vous] or null
+// note: spelling/formation note (shown after every answer)
+// hl: highlight info for spelling exceptions
+
+const VERBS = [
+// ====== BLOCK 1: Hulpwerkwoorden présent ======
+{ inf:'être', nl:'zijn', type:'auxiliary', aux:'avoir', pp:'été', ppres:'étant',
+  conj:{
+    present:['suis','es','est','sommes','êtes','sont'],
+    imparfait:['étais','étais','était','étions','étiez','étaient'],
+    futur:['serai','seras','sera','serons','serez','seront'],
+    conditionnel:['serais','serais','serait','serions','seriez','seraient'],
+    subjonctif:['sois','sois','soit','soyons','soyez','soient'],
+    passeSimple:['fus','fus','fut','fûmes','fûtes','furent'],
+  },
+  imp:['sois','soyons','soyez'], block:1, sub:1,
+  note:'Être is onregelmatig in alle tijden.',
+  examples:{
+    present:{fr:'Je suis content.',nl:'Ik ben blij.'},
+    imparfait:{fr:'J\'étais fatigué.',nl:'Ik was moe.'},
+    futur:{fr:'Je serai là demain.',nl:'Ik zal er morgen zijn.'},
+    passeCompose:{fr:'J\'ai été malade.',nl:'Ik ben ziek geweest.'},
+  }
+},
+{ inf:'avoir', nl:'hebben', type:'auxiliary', aux:'avoir', pp:'eu', ppres:'ayant',
+  conj:{
+    present:['ai','as','a','avons','avez','ont'],
+    imparfait:['avais','avais','avait','avions','aviez','avaient'],
+    futur:['aurai','auras','aura','aurons','aurez','auront'],
+    conditionnel:['aurais','aurais','aurait','aurions','auriez','auraient'],
+    subjonctif:['aie','aies','ait','ayons','ayez','aient'],
+    passeSimple:['eus','eus','eut','eûmes','eûtes','eurent'],
+  },
+  imp:['aie','ayons','ayez'], block:1, sub:2,
+  note:'Avoir is onregelmatig in alle tijden.',
+  examples:{
+    present:{fr:'J\'ai un chat.',nl:'Ik heb een kat.'},
+    imparfait:{fr:'J\'avais faim.',nl:'Ik had honger.'},
+    futur:{fr:'J\'aurai le temps.',nl:'Ik zal de tijd hebben.'},
+    passeCompose:{fr:'J\'ai eu de la chance.',nl:'Ik heb geluk gehad.'},
+  }
+},
+{ inf:'faire', nl:'doen / maken', type:'auxiliary', aux:'avoir', pp:'fait', ppres:'faisant',
+  conj:{
+    present:['fais','fais','fait','faisons','faites','font'],
+    imparfait:['faisais','faisais','faisait','faisions','faisiez','faisaient'],
+    futur:['ferai','feras','fera','ferons','ferez','feront'],
+    conditionnel:['ferais','ferais','ferait','ferions','feriez','feraient'],
+    subjonctif:['fasse','fasses','fasse','fassions','fassiez','fassent'],
+    passeSimple:['fis','fis','fit','fîmes','fîtes','firent'],
+  },
+  imp:['fais','faisons','faites'], block:1, sub:3,
+  note:'Faire is onregelmatig. Let op: vous faites (niet *faisez).',
+  examples:{
+    present:{fr:'Je fais du sport.',nl:'Ik doe aan sport.'},
+    imparfait:{fr:'Je faisais mes devoirs.',nl:'Ik maakte mijn huiswerk.'},
+    futur:{fr:'Je ferai le ménage.',nl:'Ik zal schoonmaken.'},
+    passeCompose:{fr:'J\'ai fait un gâteau.',nl:'Ik heb een taart gemaakt.'},
+  }
+},
+
+// ====== BLOCK 2: Regelmatige werkwoorden présent ======
+{ inf:'parler', nl:'spreken / praten', type:'regular-er', aux:'avoir', pp:'parlé', ppres:'parlant',
+  conj:{
+    present:['parle','parles','parle','parlons','parlez','parlent'],
+    imparfait:['parlais','parlais','parlait','parlions','parliez','parlaient'],
+    futur:['parlerai','parleras','parlera','parlerons','parlerez','parleront'],
+    conditionnel:['parlerais','parlerais','parlerait','parlerions','parleriez','parleraient'],
+    subjonctif:['parle','parles','parle','parlions','parliez','parlent'],
+    passeSimple:['parlai','parlas','parla','parlâmes','parlâtes','parlèrent'],
+  },
+  imp:['parle','parlons','parlez'], block:2, sub:1,
+  note:'Présent -er: stam (parl-) + -e, -es, -e, -ons, -ez, -ent',
+  examples:{
+    present:{fr:'Tu parles très bien français.',nl:'Jij spreekt heel goed Frans.'},
+    imparfait:{fr:'Nous parlions de nos vacances.',nl:'Wij spraken over onze vakantie.'},
+    futur:{fr:'Je parlerai avec le professeur.',nl:'Ik zal met de leraar spreken.'},
+    passeCompose:{fr:'J\'ai parlé à mon ami.',nl:'Ik heb met mijn vriend gesproken.'},
+  }
+},
+{ inf:'finir', nl:'eindigen / afmaken', type:'regular-ir', aux:'avoir', pp:'fini', ppres:'finissant',
+  conj:{
+    present:['finis','finis','finit','finissons','finissez','finissent'],
+    imparfait:['finissais','finissais','finissait','finissions','finissiez','finissaient'],
+    futur:['finirai','finiras','finira','finirons','finirez','finiront'],
+    conditionnel:['finirais','finirais','finirait','finirions','finiriez','finiraient'],
+    subjonctif:['finisse','finisses','finisse','finissions','finissiez','finissent'],
+    passeSimple:['finis','finis','finit','finîmes','finîtes','finirent'],
+  },
+  imp:['finis','finissons','finissez'], block:2, sub:2,
+  note:'Présent -ir (met -iss-): stam (fin-) + -is, -is, -it, -issons, -issez, -issent',
+  examples:{
+    present:{fr:'Je finis mes devoirs.',nl:'Ik maak mijn huiswerk af.'},
+    imparfait:{fr:'Il finissait toujours en retard.',nl:'Hij eindigde altijd te laat.'},
+    futur:{fr:'Je finirai ce livre demain.',nl:'Ik zal dit boek morgen uitlezen.'},
+    passeCompose:{fr:'J\'ai fini mon travail.',nl:'Ik heb mijn werk afgemaakt.'},
+  }
+},
+{ inf:'rendre', nl:'teruggeven', type:'regular-re', aux:'avoir', pp:'rendu', ppres:'rendant',
+  conj:{
+    present:['rends','rends','rend','rendons','rendez','rendent'],
+    imparfait:['rendais','rendais','rendait','rendions','rendiez','rendaient'],
+    futur:['rendrai','rendras','rendra','rendrons','rendrez','rendront'],
+    conditionnel:['rendrais','rendrais','rendrait','rendrions','rendriez','rendraient'],
+    subjonctif:['rende','rendes','rende','rendions','rendiez','rendent'],
+    passeSimple:['rendis','rendis','rendit','rendîmes','rendîtes','rendirent'],
+  },
+  imp:['rends','rendons','rendez'], block:2, sub:3,
+  note:'Présent -re: stam (rend-) + -s, -s, -, -ons, -ez, -ent (3e pers. enk. geen uitgang)',
+  examples:{
+    present:{fr:'Je rends les livres à la bibliothèque.',nl:'Ik geef de boeken terug aan de bibliotheek.'},
+    imparfait:{fr:'Il rendait visite à sa grand-mère.',nl:'Hij bracht een bezoek aan zijn oma.'},
+    passeCompose:{fr:'J\'ai rendu le livre.',nl:'Ik heb het boek teruggegeven.'},
+  }
+},
+{ inf:'habiter', nl:'wonen', type:'regular-er', aux:'avoir', pp:'habité', ppres:'habitant',
+  conj:{
+    present:['habite','habites','habite','habitons','habitez','habitent'],
+    imparfait:['habitais','habitais','habitait','habitions','habitiez','habitaient'],
+    futur:['habiterai','habiteras','habitera','habiterons','habiterez','habiteront'],
+    conditionnel:['habiterais','habiterais','habiterait','habiterions','habiteriez','habiteraient'],
+    subjonctif:['habite','habites','habite','habitions','habitiez','habitent'],
+    passeSimple:['habitai','habitas','habita','habitâmes','habitâtes','habitèrent'],
+  },
+  imp:['habite','habitons','habitez'], block:2, sub:4,
+  note:'Présent -er: stam (habit-) + -e, -es, -e, -ons, -ez, -ent',
+  examples:{
+    present:{fr:'J\'habite à Paris.',nl:'Ik woon in Parijs.'},
+    passeCompose:{fr:'J\'ai habité en France.',nl:'Ik heb in Frankrijk gewoond.'},
+  }
+},
+{ inf:'aimer', nl:'houden van / leuk vinden', type:'regular-er', aux:'avoir', pp:'aimé', ppres:'aimant',
+  conj:{
+    present:['aime','aimes','aime','aimons','aimez','aiment'],
+    imparfait:['aimais','aimais','aimait','aimions','aimiez','aimaient'],
+    futur:['aimerai','aimeras','aimera','aimerons','aimerez','aimeront'],
+    conditionnel:['aimerais','aimerais','aimerait','aimerions','aimeriez','aimeraient'],
+    subjonctif:['aime','aimes','aime','aimions','aimiez','aiment'],
+    passeSimple:['aimai','aimas','aima','aimâmes','aimâtes','aimèrent'],
+  },
+  imp:['aime','aimons','aimez'], block:2, sub:4,
+  note:'Présent -er: stam (aim-) + -e, -es, -e, -ons, -ez, -ent',
+  examples:{
+    present:{fr:'J\'aime le chocolat.',nl:'Ik hou van chocolade.'},
+    passeCompose:{fr:'J\'ai aimé ce film.',nl:'Ik vond deze film leuk.'},
+  }
+},
+{ inf:'écouter', nl:'luisteren', type:'regular-er', aux:'avoir', pp:'écouté', ppres:'écoutant',
+  conj:{
+    present:['écoute','écoutes','écoute','écoutons','écoutez','écoutent'],
+    imparfait:['écoutais','écoutais','écoutait','écoutions','écoutiez','écoutaient'],
+    futur:['écouterai','écouteras','écoutera','écouterons','écouterez','écouteront'],
+    conditionnel:['écouterais','écouterais','écouterait','écouterions','écouteriez','écouteraient'],
+    subjonctif:['écoute','écoutes','écoute','écoutions','écoutiez','écoutent'],
+    passeSimple:['écoutai','écoutas','écouta','écoutâmes','écoutâtes','écoutèrent'],
+  },
+  imp:['écoute','écoutons','écoutez'], block:2, sub:4,
+  note:'Présent -er: stam (écout-) + -e, -es, -e, -ons, -ez, -ent',
+  examples:{
+    present:{fr:'J\'écoute de la musique.',nl:'Ik luister naar muziek.'},
+    passeCompose:{fr:'J\'ai écouté la radio.',nl:'Ik heb naar de radio geluisterd.'},
+  }
+},
+{ inf:'regarder', nl:'kijken', type:'regular-er', aux:'avoir', pp:'regardé', ppres:'regardant',
+  conj:{
+    present:['regarde','regardes','regarde','regardons','regardez','regardent'],
+    imparfait:['regardais','regardais','regardait','regardions','regardiez','regardaient'],
+    futur:['regarderai','regarderas','regardera','regarderons','regarderez','regarderont'],
+    conditionnel:['regarderais','regarderais','regarderait','regarderions','regarderiez','regarderaient'],
+    subjonctif:['regarde','regardes','regarde','regardions','regardiez','regardent'],
+    passeSimple:['regardai','regardas','regarda','regardâmes','regardâtes','regardèrent'],
+  },
+  imp:['regarde','regardons','regardez'], block:2, sub:4,
+  note:'Présent -er: stam (regard-) + -e, -es, -e, -ons, -ez, -ent',
+  examples:{
+    present:{fr:'Je regarde la télévision.',nl:'Ik kijk televisie.'},
+    passeCompose:{fr:'J\'ai regardé un film.',nl:'Ik heb een film gekeken.'},
+  }
+},
+{ inf:'travailler', nl:'werken', type:'regular-er', aux:'avoir', pp:'travaillé', ppres:'travaillant',
+  conj:{
+    present:['travaille','travailles','travaille','travaillons','travaillez','travaillent'],
+    imparfait:['travaillais','travaillais','travaillait','travaillions','travailliez','travaillaient'],
+    futur:['travaillerai','travailleras','travaillera','travaillerons','travaillerez','travailleront'],
+    conditionnel:['travaillerais','travaillerais','travaillerait','travaillerions','travailleriez','travailleraient'],
+    subjonctif:['travaille','travailles','travaille','travaillions','travailliez','travaillent'],
+    passeSimple:['travaillai','travaillas','travailla','travaillâmes','travaillâtes','travaillèrent'],
+  },
+  imp:['travaille','travaillons','travaillez'], block:2, sub:4,
+  note:'Présent -er: stam (travaill-) + -e, -es, -e, -ons, -ez, -ent',
+  examples:{
+    present:{fr:'Je travaille dans un bureau.',nl:'Ik werk op een kantoor.'},
+    passeCompose:{fr:'J\'ai travaillé toute la journée.',nl:'Ik heb de hele dag gewerkt.'},
+  }
+},
+{ inf:'jouer', nl:'spelen', type:'regular-er', aux:'avoir', pp:'joué', ppres:'jouant',
+  conj:{
+    present:['joue','joues','joue','jouons','jouez','jouent'],
+    imparfait:['jouais','jouais','jouait','jouions','jouiez','jouaient'],
+    futur:['jouerai','joueras','jouera','jouerons','jouerez','joueront'],
+    conditionnel:['jouerais','jouerais','jouerait','jouerions','joueriez','joueraient'],
+    subjonctif:['joue','joues','joue','jouions','jouiez','jouent'],
+    passeSimple:['jouai','jouas','joua','jouâmes','jouâtes','jouèrent'],
+  },
+  imp:['joue','jouons','jouez'], block:2, sub:4,
+  note:'Présent -er: stam (jou-) + -e, -es, -e, -ons, -ez, -ent',
+  examples:{
+    present:{fr:'Je joue au football.',nl:'Ik speel voetbal.'},
+    passeCompose:{fr:'J\'ai joué avec mes amis.',nl:'Ik heb met mijn vrienden gespeeld.'},
+  }
+},
+
+// ====== BLOCK 3: Spelling-bijzonderheden ======
+{ inf:'manger', nl:'eten', type:'spelling', aux:'avoir', pp:'mangé', ppres:'mangeant',
+  conj:{
+    present:['mange','manges','mange','mangeons','mangez','mangent'],
+    imparfait:['mangeais','mangeais','mangeait','mangions','mangiez','mangeaient'],
+    futur:['mangerai','mangeras','mangera','mangerons','mangerez','mangeront'],
+    conditionnel:['mangerais','mangerais','mangerait','mangerions','mangeriez','mangeraient'],
+    subjonctif:['mange','manges','mange','mangions','mangiez','mangent'],
+    passeSimple:['mangeai','mangeas','mangea','mangeâmes','mangeâtes','mangèrent'],
+  },
+  imp:['mange','mangeons','mangez'], block:3, sub:1,
+  note:'Voor -a/-o behoudt manger zijn -e-: mangeons, mangeais. Zo blijft de g zacht.',
+  hl:{present:[3],imparfait:[0,1,2,5]},
+  examples:{
+    present:{fr:'Nous mangeons du pain.',nl:'Wij eten brood.'},
+    imparfait:{fr:'Je mangeais une pomme.',nl:'Ik at een appel.'},
+    passeCompose:{fr:'J\'ai mangé au restaurant.',nl:'Ik heb in het restaurant gegeten.'},
+  }
+},
+{ inf:'annoncer', nl:'aankondigen', type:'spelling', aux:'avoir', pp:'annoncé', ppres:'annonçant',
+  conj:{
+    present:['annonce','annonces','annonce','annonçons','annoncez','annoncent'],
+    imparfait:['annonçais','annonçais','annonçait','annoncions','annonciez','annonçaient'],
+    futur:['annoncerai','annonceras','annoncera','annoncerons','annoncerez','annonceront'],
+    conditionnel:['annoncerais','annoncerais','annoncerait','annoncerions','annonceriez','annonceraient'],
+    subjonctif:['annonce','annonces','annonce','annoncions','annonciez','annoncent'],
+    passeSimple:['annonçai','annonças','annonça','annonçâmes','annonçâtes','annoncèrent'],
+  },
+  imp:['annonce','annonçons','annoncez'], block:3, sub:1,
+  note:'Voor -a/-o krijgt annoncer een cédille: annonçons, annonçais. Zo blijft de c zacht.',
+  hl:{present:[3],imparfait:[0,1,2,5]},
+  examples:{
+    present:{fr:'Nous annonçons la nouvelle.',nl:'Wij kondigen het nieuws aan.'},
+    passeCompose:{fr:'Il a annoncé son départ.',nl:'Hij heeft zijn vertrek aangekondigd.'},
+  }
+},
+{ inf:'acheter', nl:'kopen', type:'spelling', aux:'avoir', pp:'acheté', ppres:'achetant',
+  conj:{
+    present:['achète','achètes','achète','achetons','achetez','achètent'],
+    imparfait:['achetais','achetais','achetait','achetions','achetiez','achetaient'],
+    futur:['achèterai','achèteras','achètera','achèterons','achèterez','achèteront'],
+    conditionnel:['achèterais','achèterais','achèterait','achèterions','achèteriez','achèteraient'],
+    subjonctif:['achète','achètes','achète','achetions','achetiez','achètent'],
+    passeSimple:['achetai','achetas','acheta','achetâmes','achetâtes','achetèrent'],
+  },
+  imp:['achète','achetons','achetez'], block:3, sub:2,
+  note:'Acheter: stomme e → è voor doffe lettergreep: achète, achètes, achètent (maar: achetons, achetez)',
+  hl:{present:[0,1,2,5],futur:[0,1,2,3,4,5]},
+  examples:{
+    present:{fr:'J\'achète du pain.',nl:'Ik koop brood.'},
+    futur:{fr:'J\'achèterai une voiture.',nl:'Ik zal een auto kopen.'},
+    passeCompose:{fr:'J\'ai acheté un cadeau.',nl:'Ik heb een cadeau gekocht.'},
+  }
+},
+{ inf:'appeler', nl:'roepen / noemen', type:'spelling', aux:'avoir', pp:'appelé', ppres:'appelant',
+  conj:{
+    present:['appelle','appelles','appelle','appelons','appelez','appellent'],
+    imparfait:['appelais','appelais','appelait','appelions','appeliez','appelaient'],
+    futur:['appellerai','appelleras','appellera','appellerons','appellerez','appelleront'],
+    conditionnel:['appellerais','appellerais','appellerait','appellerions','appelleriez','appelleraient'],
+    subjonctif:['appelle','appelles','appelle','appelions','appeliez','appellent'],
+    passeSimple:['appelai','appelas','appela','appelâmes','appelâtes','appelèrent'],
+  },
+  imp:['appelle','appelons','appelez'], block:3, sub:3,
+  note:'Appeler: verdubbeling -l → -ll voor doffe lettergreep: appelle (maar: appelons, appelez)',
+  hl:{present:[0,1,2,5],futur:[0,1,2,3,4,5]},
+  examples:{
+    present:{fr:'Je m\'appelle Marie.',nl:'Ik heet Marie.'},
+    passeCompose:{fr:'J\'ai appelé le médecin.',nl:'Ik heb de dokter gebeld.'},
+  }
+},
+{ inf:'jeter', nl:'gooien', type:'spelling', aux:'avoir', pp:'jeté', ppres:'jetant',
+  conj:{
+    present:['jette','jettes','jette','jetons','jetez','jettent'],
+    imparfait:['jetais','jetais','jetait','jetions','jetiez','jetaient'],
+    futur:['jetterai','jetteras','jettera','jetterons','jetterez','jetteront'],
+    conditionnel:['jetterais','jetterais','jetterait','jetterions','jetteriez','jetteraient'],
+    subjonctif:['jette','jettes','jette','jetions','jetiez','jettent'],
+    passeSimple:['jetai','jetas','jeta','jetâmes','jetâtes','jetèrent'],
+  },
+  imp:['jette','jetons','jetez'], block:3, sub:3,
+  note:'Jeter: verdubbeling -t → -tt voor doffe lettergreep: jette (maar: jetons, jetez)',
+  hl:{present:[0,1,2,5],futur:[0,1,2,3,4,5]},
+  examples:{
+    present:{fr:'Je jette la balle.',nl:'Ik gooi de bal.'},
+    passeCompose:{fr:'J\'ai jeté les déchets.',nl:'Ik heb het afval weggegooid.'},
+  }
+},
+{ inf:'envoyer', nl:'sturen / verzenden', type:'spelling', aux:'avoir', pp:'envoyé', ppres:'envoyant',
+  conj:{
+    present:['envoie','envoies','envoie','envoyons','envoyez','envoient'],
+    imparfait:['envoyais','envoyais','envoyait','envoyions','envoyiez','envoyaient'],
+    futur:['enverrai','enverras','enverra','enverrons','enverrez','enverront'],
+    conditionnel:['enverrais','enverrais','enverrait','enverrions','enverriez','enverraient'],
+    subjonctif:['envoie','envoies','envoie','envoyions','envoyiez','envoient'],
+    passeSimple:['envoyai','envoyas','envoya','envoyâmes','envoyâtes','envoyèrent'],
+  },
+  imp:['envoie','envoyons','envoyez'], block:3, sub:4,
+  note:'Envoyer: y → i voor doffe lettergreep: envoie (maar: envoyons). Futur is onregelmatig: enverr-',
+  hl:{present:[0,1,2,5],futur:[0,1,2,3,4,5]},
+  examples:{
+    present:{fr:'J\'envoie un message.',nl:'Ik stuur een bericht.'},
+    futur:{fr:'J\'enverrai le colis demain.',nl:'Ik zal het pakket morgen versturen.'},
+    passeCompose:{fr:'J\'ai envoyé une lettre.',nl:'Ik heb een brief verstuurd.'},
+  }
+},
+{ inf:'payer', nl:'betalen', type:'spelling', aux:'avoir', pp:'payé', ppres:'payant',
+  conj:{
+    present:['paie','paies','paie','payons','payez','paient'],
+    imparfait:['payais','payais','payait','payions','payiez','payaient'],
+    futur:['paierai','paieras','paiera','paierons','paierez','paieront'],
+    conditionnel:['paierais','paierais','paierait','paierions','paieriez','paieraient'],
+    subjonctif:['paie','paies','paie','payions','payiez','paient'],
+    passeSimple:['payai','payas','paya','payâmes','payâtes','payèrent'],
+  },
+  imp:['paie','payons','payez'], block:3, sub:4,
+  note:'Payer: y → i voor doffe lettergreep: paie (maar: payons). Beide vormen (paie/paye) zijn correct.',
+  hl:{present:[0,1,2,5],futur:[0,1,2,3,4,5]},
+  examples:{
+    present:{fr:'Je paie l\'addition.',nl:'Ik betaal de rekening.'},
+    passeCompose:{fr:'J\'ai payé le loyer.',nl:'Ik heb de huur betaald.'},
+  }
+},
+
+// ====== BLOCK 4: Futur proche + impératif ======
+{ inf:'aller', nl:'gaan', type:'irregular', aux:'être', pp:'allé', ppres:'allant',
+  conj:{
+    present:['vais','vas','va','allons','allez','vont'],
+    imparfait:['allais','allais','allait','allions','alliez','allaient'],
+    futur:['irai','iras','ira','irons','irez','iront'],
+    conditionnel:['irais','irais','irait','irions','iriez','iraient'],
+    subjonctif:['aille','ailles','aille','allions','alliez','aillent'],
+    passeSimple:['allai','allas','alla','allâmes','allâtes','allèrent'],
+  },
+  imp:['va','allons','allez'], block:4, sub:1,
+  note:'Aller is onregelmatig. Passé composé met être: je suis allé(e). Futur: ir-',
+  examples:{
+    present:{fr:'Je vais à l\'école.',nl:'Ik ga naar school.'},
+    futur:{fr:'J\'irai en France.',nl:'Ik zal naar Frankrijk gaan.'},
+    passeCompose:{fr:'Je suis allé au cinéma.',nl:'Ik ben naar de bioscoop gegaan.'},
+  }
+},
+
+// ====== BLOCK 5: Passé composé ======
+{ inf:'partir', nl:'vertrekken', type:'irregular', aux:'être', pp:'parti', ppres:'partant',
+  conj:{
+    present:['pars','pars','part','partons','partez','partent'],
+    imparfait:['partais','partais','partait','partions','partiez','partaient'],
+    futur:['partirai','partiras','partira','partirons','partirez','partiront'],
+    conditionnel:['partirais','partirais','partirait','partirions','partiriez','partiraient'],
+    subjonctif:['parte','partes','parte','partions','partiez','partent'],
+    passeSimple:['partis','partis','partit','partîmes','partîtes','partirent'],
+  },
+  imp:['pars','partons','partez'], block:5, sub:3,
+  note:'Partir: être-werkwoord. Passé composé: je suis parti(e).',
+  examples:{
+    present:{fr:'Je pars à huit heures.',nl:'Ik vertrek om acht uur.'},
+    passeCompose:{fr:'Il est parti hier.',nl:'Hij is gisteren vertrokken.'},
+  }
+},
+{ inf:'arriver', nl:'aankomen', type:'regular-er', aux:'être', pp:'arrivé', ppres:'arrivant',
+  conj:{
+    present:['arrive','arrives','arrive','arrivons','arrivez','arrivent'],
+    imparfait:['arrivais','arrivais','arrivait','arrivions','arriviez','arrivaient'],
+    futur:['arriverai','arriveras','arrivera','arriverons','arriverez','arriveront'],
+    conditionnel:['arriverais','arriverais','arriverait','arriverions','arriveriez','arriveraient'],
+    subjonctif:['arrive','arrives','arrive','arrivions','arriviez','arrivent'],
+    passeSimple:['arrivai','arrivas','arriva','arrivâmes','arrivâtes','arrivèrent'],
+  },
+  imp:['arrive','arrivons','arrivez'], block:5, sub:3,
+  note:'Arriver: être-werkwoord. Passé composé: je suis arrivé(e).',
+  examples:{
+    present:{fr:'J\'arrive à la gare.',nl:'Ik kom aan op het station.'},
+    passeCompose:{fr:'Elle est arrivée en retard.',nl:'Zij is te laat aangekomen.'},
+  }
+},
+{ inf:'venir', nl:'komen', type:'irregular', aux:'être', pp:'venu', ppres:'venant',
+  conj:{
+    present:['viens','viens','vient','venons','venez','viennent'],
+    imparfait:['venais','venais','venait','venions','veniez','venaient'],
+    futur:['viendrai','viendras','viendra','viendrons','viendrez','viendront'],
+    conditionnel:['viendrais','viendrais','viendrait','viendrions','viendriez','viendraient'],
+    subjonctif:['vienne','viennes','vienne','venions','veniez','viennent'],
+    passeSimple:['vins','vins','vint','vînmes','vîntes','vinrent'],
+  },
+  imp:['viens','venons','venez'], block:5, sub:3,
+  note:'Venir: être-werkwoord, onregelmatig. Passé composé: je suis venu(e).',
+  examples:{
+    present:{fr:'Je viens de France.',nl:'Ik kom uit Frankrijk.'},
+    passeCompose:{fr:'Il est venu hier.',nl:'Hij is gisteren gekomen.'},
+  }
+},
+
+// ====== BLOCK 7: Onregelmatige werkwoorden ======
+{ inf:'pouvoir', nl:'kunnen', type:'irregular', aux:'avoir', pp:'pu', ppres:'pouvant',
+  conj:{
+    present:['peux','peux','peut','pouvons','pouvez','peuvent'],
+    imparfait:['pouvais','pouvais','pouvait','pouvions','pouviez','pouvaient'],
+    futur:['pourrai','pourras','pourra','pourrons','pourrez','pourront'],
+    conditionnel:['pourrais','pourrais','pourrait','pourrions','pourriez','pourraient'],
+    subjonctif:['puisse','puisses','puisse','puissions','puissiez','puissent'],
+    passeSimple:['pus','pus','put','pûmes','pûtes','purent'],
+  },
+  imp:null, block:7, sub:1,
+  note:'Pouvoir is onregelmatig. Geen impératif. Futur: pourr-',
+  examples:{
+    present:{fr:'Je peux t\'aider.',nl:'Ik kan je helpen.'},
+    conditionnel:{fr:'Je pourrais venir demain.',nl:'Ik zou morgen kunnen komen.'},
+    passeCompose:{fr:'J\'ai pu partir tôt.',nl:'Ik heb vroeg kunnen vertrekken.'},
+  }
+},
+{ inf:'vouloir', nl:'willen', type:'irregular', aux:'avoir', pp:'voulu', ppres:'voulant',
+  conj:{
+    present:['veux','veux','veut','voulons','voulez','veulent'],
+    imparfait:['voulais','voulais','voulait','voulions','vouliez','voulaient'],
+    futur:['voudrai','voudras','voudra','voudrons','voudrez','voudront'],
+    conditionnel:['voudrais','voudrais','voudrait','voudrions','voudriez','voudraient'],
+    subjonctif:['veuille','veuilles','veuille','voulions','vouliez','veuillent'],
+    passeSimple:['voulus','voulus','voulut','voulûmes','voulûtes','voulurent'],
+  },
+  imp:['veuille','voulons','veuillez'], block:7, sub:1,
+  note:'Vouloir is onregelmatig. Conditionnel "voudrais" = beleefd verzoek.',
+  examples:{
+    present:{fr:'Je veux un café.',nl:'Ik wil een koffie.'},
+    conditionnel:{fr:'Je voudrais une baguette.',nl:'Ik zou graag een stokbrood willen.'},
+    passeCompose:{fr:'Il a voulu partir.',nl:'Hij wilde vertrekken.'},
+  }
+},
+{ inf:'devoir', nl:'moeten', type:'irregular', aux:'avoir', pp:'dû', ppres:'devant',
+  conj:{
+    present:['dois','dois','doit','devons','devez','doivent'],
+    imparfait:['devais','devais','devait','devions','deviez','devaient'],
+    futur:['devrai','devras','devra','devrons','devrez','devront'],
+    conditionnel:['devrais','devrais','devrait','devrions','devriez','devraient'],
+    subjonctif:['doive','doives','doive','devions','deviez','doivent'],
+    passeSimple:['dus','dus','dut','dûmes','dûtes','durent'],
+  },
+  imp:null, block:7, sub:1,
+  note:'Devoir is onregelmatig. Geen impératif. Voltooid deelwoord: dû (met accent).',
+  examples:{
+    present:{fr:'Je dois travailler.',nl:'Ik moet werken.'},
+    conditionnel:{fr:'Tu devrais dormir.',nl:'Je zou moeten slapen.'},
+    passeCompose:{fr:'J\'ai dû partir.',nl:'Ik heb moeten vertrekken.'},
+  }
+},
+{ inf:'savoir', nl:'weten / kennen', type:'irregular', aux:'avoir', pp:'su', ppres:'sachant',
+  conj:{
+    present:['sais','sais','sait','savons','savez','savent'],
+    imparfait:['savais','savais','savait','savions','saviez','savaient'],
+    futur:['saurai','sauras','saura','saurons','saurez','sauront'],
+    conditionnel:['saurais','saurais','saurait','saurions','sauriez','sauraient'],
+    subjonctif:['sache','saches','sache','sachions','sachiez','sachent'],
+    passeSimple:['sus','sus','sut','sûmes','sûtes','surent'],
+  },
+  imp:['sache','sachons','sachez'], block:7, sub:1,
+  note:'Savoir is onregelmatig. Subjonctif/impératif: sache.',
+  examples:{
+    present:{fr:'Je sais nager.',nl:'Ik kan zwemmen.'},
+    passeCompose:{fr:'J\'ai su la vérité.',nl:'Ik heb de waarheid geweten.'},
+  }
+},
+{ inf:'prendre', nl:'nemen / pakken', type:'irregular', aux:'avoir', pp:'pris', ppres:'prenant',
+  conj:{
+    present:['prends','prends','prend','prenons','prenez','prennent'],
+    imparfait:['prenais','prenais','prenait','prenions','preniez','prenaient'],
+    futur:['prendrai','prendras','prendra','prendrons','prendrez','prendront'],
+    conditionnel:['prendrais','prendrais','prendrait','prendrions','prendriez','prendraient'],
+    subjonctif:['prenne','prennes','prenne','prenions','preniez','prennent'],
+    passeSimple:['pris','pris','prit','prîmes','prîtes','prirent'],
+  },
+  imp:['prends','prenons','prenez'], block:7, sub:2,
+  note:'Prendre: stam prend-/prenn-. Voltooid deelwoord: pris.',
+  examples:{
+    present:{fr:'Je prends le bus.',nl:'Ik neem de bus.'},
+    passeCompose:{fr:'J\'ai pris un café.',nl:'Ik heb een koffie genomen.'},
+  }
+},
+{ inf:'mettre', nl:'zetten / leggen', type:'irregular', aux:'avoir', pp:'mis', ppres:'mettant',
+  conj:{
+    present:['mets','mets','met','mettons','mettez','mettent'],
+    imparfait:['mettais','mettais','mettait','mettions','mettiez','mettaient'],
+    futur:['mettrai','mettras','mettra','mettrons','mettrez','mettront'],
+    conditionnel:['mettrais','mettrais','mettrait','mettrions','mettriez','mettraient'],
+    subjonctif:['mette','mettes','mette','mettions','mettiez','mettent'],
+    passeSimple:['mis','mis','mit','mîmes','mîtes','mirent'],
+  },
+  imp:['mets','mettons','mettez'], block:7, sub:2,
+  note:'Mettre: stam met-/mett-. Voltooid deelwoord: mis.',
+  examples:{
+    present:{fr:'Je mets la table.',nl:'Ik dek de tafel.'},
+    passeCompose:{fr:'J\'ai mis mon manteau.',nl:'Ik heb mijn jas aangedaan.'},
+  }
+},
+{ inf:'voir', nl:'zien', type:'irregular', aux:'avoir', pp:'vu', ppres:'voyant',
+  conj:{
+    present:['vois','vois','voit','voyons','voyez','voient'],
+    imparfait:['voyais','voyais','voyait','voyions','voyiez','voyaient'],
+    futur:['verrai','verras','verra','verrons','verrez','verront'],
+    conditionnel:['verrais','verrais','verrait','verrions','verriez','verraient'],
+    subjonctif:['voie','voies','voie','voyions','voyiez','voient'],
+    passeSimple:['vis','vis','vit','vîmes','vîtes','virent'],
+  },
+  imp:['vois','voyons','voyez'], block:7, sub:2,
+  note:'Voir is onregelmatig. Futur: verr-. Voltooid deelwoord: vu.',
+  examples:{
+    present:{fr:'Je vois la mer.',nl:'Ik zie de zee.'},
+    passeCompose:{fr:'J\'ai vu un film.',nl:'Ik heb een film gezien.'},
+  }
+},
+{ inf:'tenir', nl:'houden / vasthouden', type:'irregular', aux:'avoir', pp:'tenu', ppres:'tenant',
+  conj:{
+    present:['tiens','tiens','tient','tenons','tenez','tiennent'],
+    imparfait:['tenais','tenais','tenait','tenions','teniez','tenaient'],
+    futur:['tiendrai','tiendras','tiendra','tiendrons','tiendrez','tiendront'],
+    conditionnel:['tiendrais','tiendrais','tiendrait','tiendrions','tiendriez','tiendraient'],
+    subjonctif:['tienne','tiennes','tienne','tenions','teniez','tiennent'],
+    passeSimple:['tins','tins','tint','tînmes','tîntes','tinrent'],
+  },
+  imp:['tiens','tenons','tenez'], block:7, sub:3,
+  note:'Tenir: zelfde patroon als venir. Futur: tiendr-.',
+  examples:{
+    present:{fr:'Je tiens le livre.',nl:'Ik houd het boek vast.'},
+    passeCompose:{fr:'J\'ai tenu ma promesse.',nl:'Ik heb mijn belofte gehouden.'},
+  }
+},
+{ inf:'conduire', nl:'rijden / besturen', type:'irregular', aux:'avoir', pp:'conduit', ppres:'conduisant',
+  conj:{
+    present:['conduis','conduis','conduit','conduisons','conduisez','conduisent'],
+    imparfait:['conduisais','conduisais','conduisait','conduisions','conduisiez','conduisaient'],
+    futur:['conduirai','conduiras','conduira','conduirons','conduirez','conduiront'],
+    conditionnel:['conduirais','conduirais','conduirait','conduirions','conduiriez','conduiraient'],
+    subjonctif:['conduise','conduises','conduise','conduisions','conduisiez','conduisent'],
+    passeSimple:['conduisis','conduisis','conduisit','conduisîmes','conduisîtes','conduisirent'],
+  },
+  imp:['conduis','conduisons','conduisez'], block:7, sub:4,
+  note:'Conduire: stam condui-/conduis-. Voltooid deelwoord: conduit.',
+  examples:{
+    present:{fr:'Je conduis ma voiture.',nl:'Ik rijd in mijn auto.'},
+    passeCompose:{fr:'J\'ai conduit toute la nuit.',nl:'Ik heb de hele nacht gereden.'},
+  }
+},
+{ inf:'connaître', nl:'kennen', type:'irregular', aux:'avoir', pp:'connu', ppres:'connaissant',
+  conj:{
+    present:['connais','connais','connaît','connaissons','connaissez','connaissent'],
+    imparfait:['connaissais','connaissais','connaissait','connaissions','connaissiez','connaissaient'],
+    futur:['connaîtrai','connaîtras','connaîtra','connaîtrons','connaîtrez','connaîtront'],
+    conditionnel:['connaîtrais','connaîtrais','connaîtrait','connaîtrions','connaîtriez','connaîtraient'],
+    subjonctif:['connaisse','connaisses','connaisse','connaissions','connaissiez','connaissent'],
+    passeSimple:['connus','connus','connut','connûmes','connûtes','connurent'],
+  },
+  imp:['connais','connaissons','connaissez'], block:7, sub:4,
+  note:'Connaître: accent circonflexe vóór -t: connaît. Voltooid deelwoord: connu.',
+  examples:{
+    present:{fr:'Je connais cette ville.',nl:'Ik ken deze stad.'},
+    passeCompose:{fr:'J\'ai connu ton père.',nl:'Ik heb je vader gekend.'},
+  }
+},
+{ inf:'courir', nl:'rennen / hardlopen', type:'irregular', aux:'avoir', pp:'couru', ppres:'courant',
+  conj:{
+    present:['cours','cours','court','courons','courez','courent'],
+    imparfait:['courais','courais','courait','courions','couriez','couraient'],
+    futur:['courrai','courras','courra','courrons','courrez','courront'],
+    conditionnel:['courrais','courrais','courrait','courrions','courriez','courraient'],
+    subjonctif:['coure','coures','coure','courions','couriez','courent'],
+    passeSimple:['courus','courus','courut','courûmes','courûtes','coururent'],
+  },
+  imp:['cours','courons','courez'], block:7, sub:4,
+  note:'Courir: futur met dubbel-r: courrai. Voltooid deelwoord: couru.',
+  examples:{
+    present:{fr:'Je cours tous les matins.',nl:'Ik ren elke ochtend.'},
+    passeCompose:{fr:'J\'ai couru un marathon.',nl:'Ik heb een marathon gerend.'},
+  }
+},
+{ inf:'dormir', nl:'slapen', type:'irregular', aux:'avoir', pp:'dormi', ppres:'dormant',
+  conj:{
+    present:['dors','dors','dort','dormons','dormez','dorment'],
+    imparfait:['dormais','dormais','dormait','dormions','dormiez','dormaient'],
+    futur:['dormirai','dormiras','dormira','dormirons','dormirez','dormiront'],
+    conditionnel:['dormirais','dormirais','dormirait','dormirions','dormiriez','dormiraient'],
+    subjonctif:['dorme','dormes','dorme','dormions','dormiez','dorment'],
+    passeSimple:['dormis','dormis','dormit','dormîmes','dormîtes','dormirent'],
+  },
+  imp:['dors','dormons','dormez'], block:7, sub:4,
+  note:'Dormir: -ir zonder -iss- tussenvoeging (niet *dormissons).',
+  examples:{
+    present:{fr:'Je dors huit heures.',nl:'Ik slaap acht uur.'},
+    passeCompose:{fr:'J\'ai dormi toute la nuit.',nl:'Ik heb de hele nacht geslapen.'},
+  }
+},
+
+// ====== BLOCK 8: Bijzondere vormen ======
+{ inf:'se laver', nl:'zich wassen', type:'reflexive', aux:'être', pp:'lavé', ppres:'se lavant',
+  conj:{
+    present:['me lave','te laves','se lave','nous lavons','vous lavez','se lavent'],
+    imparfait:['me lavais','te lavais','se lavait','nous lavions','vous laviez','se lavaient'],
+    futur:['me laverai','te laveras','se lavera','nous laverons','vous laverez','se laveront'],
+    conditionnel:['me laverais','te laverais','se laverait','nous laverions','vous laveriez','se laveraient'],
+    subjonctif:['me lave','te laves','se lave','nous lavions','vous laviez','se lavent'],
+    passeSimple:['me lavai','te lavas','se lava','nous lavâmes','vous lavâtes','se lavèrent'],
+  },
+  imp:['lave-toi','lavons-nous','lavez-vous'], block:8, sub:1,
+  note:'Wederkerend werkwoord: me/te/se/nous/vous/se + werkwoord. Passé composé met être.',
+  examples:{
+    present:{fr:'Je me lave les mains.',nl:'Ik was mijn handen.'},
+    passeCompose:{fr:'Il s\'est lavé.',nl:'Hij heeft zich gewassen.'},
+  }
+},
+{ inf:'falloir', nl:'moeten / nodig zijn', type:'impersonal', aux:'avoir', pp:'fallu', ppres:null,
+  conj:{
+    present:[null,null,'faut',null,null,null],
+    imparfait:[null,null,'fallait',null,null,null],
+    futur:[null,null,'faudra',null,null,null],
+    conditionnel:[null,null,'faudrait',null,null,null],
+    subjonctif:[null,null,'faille',null,null,null],
+    passeSimple:[null,null,'fallut',null,null,null],
+  },
+  imp:null, block:8, sub:3,
+  note:'Onpersoonlijk werkwoord: alleen "il" als onderwerp. Il faut = het is nodig / je moet.',
+  examples:{
+    present:{fr:'Il faut travailler.',nl:'Je moet werken.'},
+    conditionnel:{fr:'Il faudrait partir.',nl:'Je zou moeten vertrekken.'},
+    passeCompose:{fr:'Il a fallu attendre.',nl:'Het was nodig om te wachten.'},
+  }
+},
+{ inf:'pleuvoir', nl:'regenen', type:'impersonal', aux:'avoir', pp:'plu', ppres:'pleuvant',
+  conj:{
+    present:[null,null,'pleut',null,null,null],
+    imparfait:[null,null,'pleuvait',null,null,null],
+    futur:[null,null,'pleuvra',null,null,null],
+    conditionnel:[null,null,'pleuvrait',null,null,null],
+    subjonctif:[null,null,'pleuve',null,null,null],
+    passeSimple:[null,null,'plut',null,null,null],
+  },
+  imp:null, block:8, sub:3,
+  note:'Onpersoonlijk werkwoord: alleen "il" als onderwerp. Il pleut = het regent.',
+  examples:{
+    present:{fr:'Il pleut aujourd\'hui.',nl:'Het regent vandaag.'},
+    imparfait:{fr:'Il pleuvait hier.',nl:'Het regende gisteren.'},
+    futur:{fr:'Il pleuvra demain.',nl:'Het zal morgen regenen.'},
+  }
+},
+];
+
+// ============================================================
+//   BLOCK & SUB-BLOCK DEFINITIONS
+// ============================================================
+const BLOCKS = [
+  { id:1, name:'Hulpwerkwoorden', tenses:['present'],
+    subs:[
+      {id:1, name:'être', verbs:['être']},
+      {id:2, name:'avoir', verbs:['avoir']},
+      {id:3, name:'faire', verbs:['faire']},
+      {id:4, name:'Mix hulpwerkwoorden', verbs:['être','avoir','faire'], isMix:true},
+    ]},
+  { id:2, name:'Regelmatig présent', tenses:['present'],
+    subs:[
+      {id:1, name:'-er: parler', verbs:['parler']},
+      {id:2, name:'-ir: finir', verbs:['finir']},
+      {id:3, name:'-re: rendre', verbs:['rendre']},
+      {id:4, name:'Extra -er werkwoorden', verbs:['habiter','aimer','écouter','regarder','travailler','jouer']},
+      {id:5, name:'Mix regelmatig', verbs:['parler','finir','rendre','habiter','aimer','écouter','regarder','travailler','jouer'], isMix:true},
+    ]},
+  { id:3, name:'Spelling-bijzonderheden', tenses:['present'],
+    subs:[
+      {id:1, name:'manger / annoncer', verbs:['manger','annoncer']},
+      {id:2, name:'acheter', verbs:['acheter']},
+      {id:3, name:'appeler / jeter', verbs:['appeler','jeter']},
+      {id:4, name:'envoyer / payer', verbs:['envoyer','payer']},
+      {id:5, name:'Mix spelling', verbs:['manger','annoncer','acheter','appeler','jeter','envoyer','payer'], isMix:true},
+    ]},
+  { id:4, name:'Futur proche + impératif', tenses:['present','imperatif','futProche'],
+    subs:[
+      {id:1, name:'aller (présent)', verbs:['aller'], tenses:['present']},
+      {id:2, name:'Futur proche', verbs:['parler','finir','rendre','aller','manger','faire'], tenses:['futProche']},
+      {id:3, name:'Impératif', verbs:['parler','finir','rendre','faire','être','avoir','aller'], tenses:['imperatif']},
+      {id:4, name:'Mix', verbs:['aller','parler','finir','rendre','faire'], tenses:['present','imperatif','futProche'], isMix:true},
+    ]},
+  { id:5, name:'Passé composé', tenses:['passeCompose'],
+    subs:[
+      {id:1, name:'Deelwoorden -é/-i/-u', verbs:['parler','finir','rendre'], tenses:['passeCompose']},
+      {id:2, name:'PC met avoir', verbs:['parler','finir','rendre','manger','faire','voir'], tenses:['passeCompose']},
+      {id:3, name:'PC met être', verbs:['aller','venir','partir','arriver'], tenses:['passeCompose']},
+      {id:4, name:'Onregelmatige deelwoorden', verbs:['être','avoir','faire','prendre','mettre','voir'], tenses:['passeCompose']},
+      {id:5, name:'Mix passé composé', verbs:['parler','finir','aller','venir','faire','prendre','voir','partir'], tenses:['passeCompose'], isMix:true},
+    ]},
+  { id:6, name:'Imparfait + conditionnel', tenses:['imparfait','conditionnel'],
+    subs:[
+      {id:1, name:'Imparfait vorming', verbs:['parler','finir','rendre','être','avoir'], tenses:['imparfait']},
+      {id:2, name:'Imparfait bekende ww', verbs:['faire','aller','manger','habiter','jouer'], tenses:['imparfait']},
+      {id:3, name:'Conditionnel', verbs:['parler','finir','être','avoir','faire','aller','pouvoir','vouloir'], tenses:['conditionnel']},
+      {id:4, name:'Gebruik imparfait vs PC', verbs:['parler','faire','aller','habiter'], tenses:['imparfait','passeCompose']},
+      {id:5, name:'Mix', verbs:['parler','finir','faire','aller','pouvoir','vouloir','être'], tenses:['imparfait','conditionnel'], isMix:true},
+    ]},
+  { id:7, name:'Onregelmatige werkwoorden', tenses:['present','passeCompose','imparfait','futur'],
+    subs:[
+      {id:1, name:'pouvoir, vouloir, devoir, savoir', verbs:['pouvoir','vouloir','devoir','savoir']},
+      {id:2, name:'prendre, mettre, voir', verbs:['prendre','mettre','voir']},
+      {id:3, name:'venir, tenir', verbs:['venir','tenir']},
+      {id:4, name:'conduire, connaître, courir, dormir', verbs:['conduire','connaître','courir','dormir']},
+      {id:5, name:'Mix onregelmatig', verbs:['pouvoir','vouloir','prendre','voir','venir','conduire','dormir'], isMix:true},
+    ]},
+  { id:8, name:'Bijzondere vormen', tenses:['present','passeCompose','futur','subjonctif','passeSimple','partPresent'],
+    subs:[
+      {id:1, name:'Wederkerend (se laver)', verbs:['se laver'], tenses:['present','passeCompose']},
+      {id:2, name:'Futur simple', verbs:['parler','finir','être','avoir','faire','aller','pouvoir','vouloir'], tenses:['futur']},
+      {id:3, name:'Onpersoonlijk (falloir, pleuvoir)', verbs:['falloir','pleuvoir']},
+      {id:4, name:'Subjonctif présent', verbs:['parler','finir','être','avoir','faire','aller','pouvoir','vouloir'], tenses:['subjonctif']},
+      {id:5, name:'Passé simple (herkenning)', verbs:['parler','finir','rendre','être','avoir','faire','aller','venir'], tenses:['passeSimple'], recognitionOnly:true},
+    ]},
+];
+
+const TOTAL_BLOCKS = BLOCKS.length;
+
+// ============================================================
+//   HELPER: Build flat card list for a sub-block
+// ============================================================
+function getVerbByInf(inf) {
+  return VERBS.find(v => v.inf === inf);
+}
+
+function getSubBlockCards(blockIdx, subIdx) {
+  const block = BLOCKS[blockIdx];
+  const sub = block.subs[subIdx];
+  const tenses = sub.tenses || block.tenses || ['present'];
+  const cards = [];
+  for (const verbInf of sub.verbs) {
+    const verb = getVerbByInf(verbInf);
+    if (!verb) continue;
+    for (const tense of tenses) {
+      if (tense === 'futProche' || tense === 'partPresent') {
+        cards.push({ verb, tense, personIdx: -1 });
+        continue;
+      }
+      if (tense === 'imperatif') {
+        if (!verb.imp) continue;
+        for (let p = 0; p < 3; p++) {
+          cards.push({ verb, tense, personIdx: p });
+        }
+        continue;
+      }
+      const forms = verb.conj[tense];
+      if (!forms) continue;
+      for (let p = 0; p < 6; p++) {
+        if (forms[p] === null) continue;
+        cards.push({ verb, tense, personIdx: p });
+      }
+    }
+  }
+  return cards;
+}
+
+function cardKey(verb, tense, personIdx) {
+  return `${verb.inf}|${tense}|${personIdx}`;
+}
+
+// ============================================================
+//   PASSÉ COMPOSÉ & FUTUR PROCHE HELPERS
+// ============================================================
+const AVOIR_PRESENT = ['ai','as','a','avons','avez','ont'];
+const ETRE_PRESENT = ['suis','es','est','sommes','êtes','sont'];
+const ALLER_PRESENT = ['vais','vas','va','allons','allez','vont'];
+
+function getPasseComposeForm(verb, personIdx) {
+  const auxForms = verb.aux === 'être' ? ETRE_PRESENT : AVOIR_PRESENT;
+  return auxForms[personIdx] + ' ' + verb.pp;
+}
+
+function getFutProcheForm(verb, personIdx) {
+  return ALLER_PRESENT[personIdx] + ' ' + verb.inf;
+}
+
+function getConjugation(verb, tense, personIdx) {
+  if (tense === 'passeCompose') return getPasseComposeForm(verb, personIdx);
+  if (tense === 'futProche') return getFutProcheForm(verb, personIdx >= 0 ? personIdx : 0);
+  if (tense === 'partPresent') return verb.ppres || '';
+  if (tense === 'imperatif') {
+    if (!verb.imp) return '';
+    return verb.imp[personIdx] || '';
+  }
+  const forms = verb.conj[tense];
+  if (!forms || forms[personIdx] === null) return '';
+  return forms[personIdx];
+}
+
+function getPersonLabel(tense, personIdx) {
+  if (tense === 'imperatif') return ['tu','nous','vous'][personIdx] || '';
+  if (tense === 'partPresent' || tense === 'futProche') return '';
+  return PERSONS[personIdx] || '';
+}
+
+function getTenseLabel(tense) {
+  return TENSES[tense] ? TENSES[tense].label : tense;
+}
+
+// ============================================================
+//   STATE MANAGEMENT
+// ============================================================
+let state = null;
+
+function defaultState() {
+  return {
+    progress: {
+      currentBlock: 0,
+      currentSub: 0,
+      currentPhase: 0,
+      blockTestPassed: new Array(TOTAL_BLOCKS).fill(false),
+    },
+    cards: {},
+    sessionStats: { recentRatios: [] },
+    lastSessionEnded: 0,
+    tenseInfoSeen: {},
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const def = defaultState();
+      state = { ...def, ...parsed };
+      state.progress = { ...def.progress, ...(parsed.progress || {}) };
+      state.cards = parsed.cards || {};
+      state.sessionStats = parsed.sessionStats || def.sessionStats;
+      if (!state.progress.blockTestPassed) state.progress.blockTestPassed = def.progress.blockTestPassed;
+      return;
+    }
+  } catch (e) { console.warn('load state failed', e); }
+  state = defaultState();
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { toast('Kon niet opslaan: ' + e.message); }
+}
+
+function getCardData(key) {
+  if (!state.cards[key]) {
+    state.cards[key] = {
+      ease: 2.5, interval: 0, due: 0, reps: 0, lapses: 0, streak: 0,
+      lastSeen: 0, phaseProgress: 0
+    };
+  }
+  return state.cards[key];
+}
+
+function exportState() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'verbes_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('Backup gedownload');
+}
+
+function importState(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (!parsed.cards) throw new Error('Ongeldig backup-bestand');
+      state = { ...defaultState(), ...parsed };
+      saveState(); renderHome(); showScreen('screen-home');
+      toast('Backup hersteld!');
+    } catch (err) { toast('Ongeldig bestand: ' + err.message); }
+  };
+  reader.readAsText(file);
+}
+
+// ============================================================
+//   SM-2 SRS ENGINE
+// ============================================================
+const DAY = 24 * 60 * 60 * 1000;
+
+function applyGrade(key, grade) {
+  const c = getCardData(key);
+  c.lastSeen = Date.now();
+  if (grade === 0) {
+    c.lapses += 1; c.reps = 0; c.interval = 0; c.streak = 0;
+    c.ease = Math.max(1.3, c.ease - 0.2);
+    c.due = Date.now() + 60000;
+  } else {
+    c.reps += 1; c.streak = (c.streak || 0) + 1;
+    if (grade === 1) {
+      if (c.reps === 1) c.interval = 1;
+      else c.interval = Math.max(1, Math.round(c.interval * 1.2));
+      c.ease = Math.max(1.3, c.ease - 0.15);
+    } else {
+      if (c.reps === 1) c.interval = 1;
+      else if (c.reps === 2) c.interval = 3;
+      else c.interval = Math.round(c.interval * c.ease);
+    }
+    c.due = Date.now() + c.interval * DAY;
+    c.phaseProgress = Math.min((c.phaseProgress || 0) + 1, PHASES_PER_SUB);
+  }
+  saveState();
+}
+
+function isDue(key) {
+  const c = state.cards[key];
+  if (!c || c.reps === 0) return false;
+  return c.due <= Date.now();
+}
+
+function isCardNew(key) {
+  const c = state.cards[key];
+  return !c || c.reps === 0;
+}
+
+function isIntervalMastered(key) {
+  const c = state.cards[key];
+  return c && c.interval >= MASTERY_INTERVAL_DAYS;
+}
+
+// ============================================================
+//   BLOCK & PHASE MANAGEMENT
+// ============================================================
+function getCurrentSubBlockCards() {
+  return getSubBlockCards(state.progress.currentBlock, state.progress.currentSub);
+}
+
+function getPhaseDirection(phase) {
+  if (phase < 2) return 'fr-nl';
+  if (phase < 4) return 'nl-fr';
+  return 'mix';
+}
+
+function isSubBlockComplete(blockIdx, subIdx) {
+  const cards = getSubBlockCards(blockIdx, subIdx);
+  return cards.length > 0 && cards.every(c => {
+    const cd = state.cards[cardKey(c.verb, c.tense, c.personIdx)];
+    return cd && cd.phaseProgress >= PHASES_PER_SUB;
+  });
+}
+
+function isBlockAllSubsComplete(blockIdx) {
+  const block = BLOCKS[blockIdx];
+  return block.subs.every((_, si) => isSubBlockComplete(blockIdx, si));
+}
+
+function getSubBlockStatus(blockIdx, subIdx) {
+  const cards = getSubBlockCards(blockIdx, subIdx);
+  if (cards.length === 0) return 'empty';
+  const cur = state.progress.currentBlock;
+  const curSub = state.progress.currentSub;
+  if (blockIdx > cur || (blockIdx === cur && subIdx > curSub)) return 'locked';
+  const allDone = cards.every(c => {
+    const cd = state.cards[cardKey(c.verb, c.tense, c.personIdx)];
+    return cd && cd.phaseProgress >= PHASES_PER_SUB;
+  });
+  if (allDone) {
+    const allMastered = cards.every(c => isIntervalMastered(cardKey(c.verb, c.tense, c.personIdx)));
+    if (allMastered) return 'gold';
+    return 'mix';
+  }
+  const minPhase = Math.min(...cards.map(c => {
+    const cd = state.cards[cardKey(c.verb, c.tense, c.personIdx)];
+    return cd ? cd.phaseProgress : 0;
+  }));
+  if (minPhase >= 4) return 'nl-fr';
+  if (minPhase >= 2) return 'fr-nl';
+  return 'empty';
+}
+
+function getBlockStatus(blockIdx) {
+  const block = BLOCKS[blockIdx];
+  const cur = state.progress.currentBlock;
+  if (blockIdx > cur) return 'locked';
+  const allSubsDone = isBlockAllSubsComplete(blockIdx);
+  if (allSubsDone && state.progress.blockTestPassed[blockIdx]) {
+    const allCards = block.subs.flatMap((_, si) => getSubBlockCards(blockIdx, si));
+    const allMastered = allCards.every(c => isIntervalMastered(cardKey(c.verb, c.tense, c.personIdx)));
+    if (allMastered) return 'gold';
+    return 'mix';
+  }
+  if (allSubsDone) return 'nl-fr';
+  const anySeen = block.subs.some((_, si) => {
+    const cards = getSubBlockCards(blockIdx, si);
+    return cards.some(c => {
+      const cd = state.cards[cardKey(c.verb, c.tense, c.personIdx)];
+      return cd && cd.reps > 0;
+    });
+  });
+  if (anySeen) return 'fr-nl';
+  return 'empty';
+}
+
+function advanceIfComplete() {
+  const bi = state.progress.currentBlock;
+  const si = state.progress.currentSub;
+  if (bi >= TOTAL_BLOCKS) return null;
+  const block = BLOCKS[bi];
+
+  if (isSubBlockComplete(bi, si)) {
+    if (si < block.subs.length - 1) {
+      state.progress.currentSub = si + 1;
+      state.progress.currentPhase = 0;
+      saveState();
+      return { subComplete: true, blockIdx: bi, subIdx: si };
+    }
+    if (isBlockAllSubsComplete(bi)) {
+      if (!state.progress.blockTestPassed[bi]) {
+        return { needsBlockTest: true, blockIdx: bi };
+      }
+      if (bi < TOTAL_BLOCKS - 1) {
+        state.progress.currentBlock = bi + 1;
+        state.progress.currentSub = 0;
+        state.progress.currentPhase = 0;
+        saveState();
+        return { blockComplete: true, blockIdx: bi };
+      }
+      return { allDone: true };
+    }
+  }
+  return null;
+}
+
+// ============================================================
+//   SESSION BUILDER
+// ============================================================
+function pickSessionCards() {
+  const bi = state.progress.currentBlock;
+  const si = state.progress.currentSub;
+  const phase = state.progress.currentPhase;
+  const dir = getPhaseDirection(phase);
+  const now = Date.now();
+
+  const ratios = (state.sessionStats.recentRatios || []).slice(-5);
+  let avgGood = 0.7;
+  if (ratios.length > 0) avgGood = ratios.reduce((a, b) => a + b, 0) / ratios.length;
+  let newRatio = avgGood > 0.8 ? 0.7 : avgGood < 0.5 ? 0.4 : 0.6;
+  const targetNew = Math.round(SESSION_LENGTH * newRatio);
+
+  const subCards = getSubBlockCards(bi, si);
+  const newCards = [];
+  for (const c of subCards) {
+    const key = cardKey(c.verb, c.tense, c.personIdx);
+    const cd = getCardData(key);
+    if (cd.phaseProgress < PHASES_PER_SUB) {
+      newCards.push({ ...c, key, dir, type: 'new' });
+    }
+  }
+
+  const reviewCards = [];
+  for (let b = 0; b <= bi; b++) {
+    const block = BLOCKS[b];
+    const maxSub = (b < bi) ? block.subs.length : si + 1;
+    for (let s = 0; s < maxSub; s++) {
+      if (b === bi && s === si) continue;
+      for (const c of getSubBlockCards(b, s)) {
+        const key = cardKey(c.verb, c.tense, c.personIdx);
+        const cd = state.cards[key];
+        if (cd && cd.reps > 0 && cd.due <= now) {
+          reviewCards.push({ ...c, key, dir: Math.random() < 0.5 ? 'fr-nl' : 'nl-fr', type: 'review' });
+        }
+      }
+    }
+  }
+  reviewCards.sort((a, b) => (state.cards[a.key]?.due || 0) - (state.cards[b.key]?.due || 0));
+
+  let session = [];
+  const picked = new Set();
+  for (const c of newCards.slice(0, targetNew)) {
+    if (!picked.has(c.key)) { session.push(c); picked.add(c.key); }
+  }
+  for (const c of reviewCards) {
+    if (session.length >= SESSION_LENGTH) break;
+    if (!picked.has(c.key)) { session.push(c); picked.add(c.key); }
+  }
+  for (const c of newCards) {
+    if (session.length >= SESSION_LENGTH) break;
+    if (!picked.has(c.key)) { session.push(c); picked.add(c.key); }
+  }
+
+  if (session.length === 0) {
+    for (const c of subCards) {
+      const key = cardKey(c.verb, c.tense, c.personIdx);
+      session.push({ ...c, key, dir, type: 'review' });
+      if (session.length >= SESSION_LENGTH) break;
+    }
+  }
+
+  shuffle(session);
+  return session.slice(0, SESSION_LENGTH);
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+// ============================================================
+//   DISTRACTOR GENERATION
+// ============================================================
+function generateDistractors(card, correctAnswer, dir) {
+  const distractors = new Set();
+  const verb = card.verb;
+  const tense = card.tense;
+
+  if (dir === 'fr-nl') {
+    const correct = getPersonLabel(tense, card.personIdx) + ' (' + getTenseLabel(tense) + ')';
+    const allTenses = Object.keys(verb.conj);
+    for (let p = 0; p < 6; p++) {
+      if (p === card.personIdx) continue;
+      const label = PERSONS[p] + ' (' + getTenseLabel(tense) + ')';
+      if (label !== correct) distractors.add(label);
+    }
+    for (const t of allTenses) {
+      if (t === tense) continue;
+      const label = getPersonLabel(t, card.personIdx) + ' (' + getTenseLabel(t) + ')';
+      if (label !== correct) distractors.add(label);
+    }
+  } else {
+    const forms = verb.conj[tense];
+    if (forms) {
+      for (let p = 0; p < 6; p++) {
+        if (p === card.personIdx) continue;
+        const f = getConjugation(verb, tense, p);
+        if (f && f !== correctAnswer) distractors.add(f);
+      }
+    }
+    const otherTenses = Object.keys(verb.conj).filter(t => t !== tense);
+    for (const t of otherTenses) {
+      const f = getConjugation(verb, t, card.personIdx);
+      if (f && f !== correctAnswer) distractors.add(f);
+    }
+  }
+
+  const arr = Array.from(distractors);
+  shuffle(arr);
+  return arr.slice(0, 3);
+}
+
+// ============================================================
+//   UI RENDERING
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function renderHome() {
+  const cx = 160, cy = 160;
+
+  function sectorPath(cx, cy, rIn, rOut, startAngle, endAngle) {
+    const s = startAngle - Math.PI / 2;
+    const e = endAngle - Math.PI / 2;
+    const large = (endAngle - startAngle) > Math.PI ? 1 : 0;
+    return [
+      `M ${cx + rOut * Math.cos(s)} ${cy + rOut * Math.sin(s)}`,
+      `A ${rOut} ${rOut} 0 ${large} 1 ${cx + rOut * Math.cos(e)} ${cy + rOut * Math.sin(e)}`,
+      `L ${cx + rIn * Math.cos(e)} ${cy + rIn * Math.sin(e)}`,
+      `A ${rIn} ${rIn} 0 ${large} 0 ${cx + rIn * Math.cos(s)} ${cy + rIn * Math.sin(s)}`,
+      'Z'
+    ].join(' ');
+  }
+
+  const COL = {
+    locked: '#1a1e24', empty: '#2a2f38',
+    'fr-nl': '#3a7d44', 'nl-fr': '#3a7d44',
+    mix: '#1a5c28', gold: 'url(#goldGrad)',
+    bg: '#0d1117',
+  };
+
+  const gap = 0.03;
+
+  let svg = `<defs><linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#c8940a"/><stop offset="30%" stop-color="#e8b910"/>
+    <stop offset="60%" stop-color="#f5d442"/><stop offset="100%" stop-color="#d4a017"/>
+  </linearGradient></defs>`;
+
+  // Outer ring: 8 main blocks
+  const outerCount = TOTAL_BLOCKS;
+  const outerAngle = (2 * Math.PI) / outerCount;
+  for (let i = 0; i < outerCount; i++) {
+    const startA = i * outerAngle + gap / 2;
+    const endA = (i + 1) * outerAngle - gap / 2;
+    const status = getBlockStatus(i);
+    const d = sectorPath(cx, cy, 130, 155, startA, endA);
+    let fill, stroke = 'none', sw = 0, opacity = 1;
+    switch (status) {
+      case 'locked': fill = COL.locked; opacity = 0.5; break;
+      case 'empty': fill = COL.empty; break;
+      case 'fr-nl': fill = COL.bg; stroke = COL['fr-nl']; sw = 2; break;
+      case 'nl-fr': fill = COL['nl-fr']; break;
+      case 'mix': fill = COL.mix; break;
+      case 'gold': fill = COL.gold; break;
+      default: fill = COL.empty;
+    }
+    svg += `<path d="${d}" fill="${fill}" opacity="${opacity}"`;
+    if (sw > 0) svg += ` stroke="${stroke}" stroke-width="${sw}"`;
+    svg += '/>';
+  }
+
+  // Inner ring: sub-blocks of current main block
+  const bi = state.progress.currentBlock;
+  if (bi < TOTAL_BLOCKS) {
+    const block = BLOCKS[bi];
+    const innerCount = block.subs.length;
+    const innerAngle = (2 * Math.PI) / innerCount;
+    for (let i = 0; i < innerCount; i++) {
+      const startA = i * innerAngle + gap / 2;
+      const endA = (i + 1) * innerAngle - gap / 2;
+      const status = getSubBlockStatus(bi, i);
+      const d = sectorPath(cx, cy, 96, 124, startA, endA);
+      let fill, stroke = 'none', sw = 0, opacity = 1;
+      switch (status) {
+        case 'locked': fill = COL.locked; opacity = 0.5; break;
+        case 'empty': fill = COL.empty; break;
+        case 'fr-nl': fill = COL.bg; stroke = COL['fr-nl']; sw = 2; break;
+        case 'nl-fr': fill = COL['nl-fr']; break;
+        case 'mix': fill = COL.mix; break;
+        case 'gold': fill = COL.gold; break;
+        default: fill = COL.empty;
+      }
+      svg += `<path d="${d}" fill="${fill}" opacity="${opacity}"`;
+      if (sw > 0) svg += ` stroke="${stroke}" stroke-width="${sw}"`;
+      svg += '/>';
+    }
+  }
+
+  document.getElementById('circle-svg').innerHTML = svg;
+
+  const startBtn = document.getElementById('start-btn');
+  if (bi >= TOTAL_BLOCKS) {
+    startBtn.disabled = true;
+    startBtn.textContent = 'Klaar!';
+  } else {
+    startBtn.disabled = false;
+    startBtn.textContent = 'Start';
+  }
+}
+
+// ============================================================
+//   SESSION RUNTIME
+// ============================================================
+let session = null;
+
+function startSession(isBlockTest) {
+  let cards;
+  if (isBlockTest) {
+    const bi = state.progress.currentBlock;
+    const block = BLOCKS[bi];
+    const allCards = block.subs.flatMap((_, si) => getSubBlockCards(bi, si));
+    shuffle(allCards);
+    cards = allCards.slice(0, BLOCK_TEST_LENGTH).map(c => ({
+      ...c, key: cardKey(c.verb, c.tense, c.personIdx),
+      dir: Math.random() < 0.5 ? 'fr-nl' : 'nl-fr', type: 'test'
+    }));
+  } else {
+    cards = pickSessionCards();
+  }
+
+  if (cards.length === 0) { toast('Geen kaarten beschikbaar.'); return; }
+
+  // Show tense info for new block if not seen
+  const bi = state.progress.currentBlock;
+  if (bi < TOTAL_BLOCKS && !isBlockTest) {
+    const block = BLOCKS[bi];
+    const mainTense = (block.tenses || ['present'])[0];
+    if (mainTense !== 'present' && !state.tenseInfoSeen[bi]) {
+      state.tenseInfoSeen[bi] = true;
+      saveState();
+      showTenseInfoScreen(mainTense);
+      setTimeout(() => {
+        actuallyStartSession(cards, isBlockTest);
+      }, 0);
+      return;
+    }
+  }
+
+  actuallyStartSession(cards, isBlockTest);
+}
+
+function actuallyStartSession(cards, isBlockTest) {
+  session = {
+    cards, idx: 0, good: 0, bad: 0,
+    isBlockTest: !!isBlockTest,
+    answered: false,
+  };
+  const bi = state.progress.currentBlock;
+  const block = BLOCKS[bi];
+  const sub = block ? block.subs[state.progress.currentSub] : null;
+  document.getElementById('session-title').textContent =
+    isBlockTest ? `Bloktoets: ${block?.name || ''}` :
+    `${block?.name || ''} · ${sub?.name || ''}`;
+  showScreen('screen-session');
+  renderMCCard();
+}
+
+function renderMCCard() {
+  if (!session || session.idx >= session.cards.length) { finishSession(); return; }
+  const c = session.cards[session.idx];
+  session.answered = false;
+
+  const phase = state.progress.currentPhase || 0;
+  let dir = c.dir || getPhaseDirection(phase);
+  if (dir === 'mix') dir = ['fr-nl', 'nl-fr', 'nl-fr'][Math.floor(Math.random() * 3)];
+
+  const correctForm = getConjugation(c.verb, c.tense, c.personIdx);
+  const personLabel = getPersonLabel(c.tense, c.personIdx);
+  const tenseLabel = getTenseLabel(c.tense);
+
+  // Direction tag
+  const dirTag = document.getElementById('mc-dir-tag');
+  dirTag.textContent = dir === 'fr-nl' ? 'FR→NL' : 'NL→FR';
+  dirTag.className = 'mc-tag ' + (dir === 'fr-nl' ? 'fr-nl' : 'nl-fr');
+
+  // Type tag
+  const typeTag = document.getElementById('mc-type-tag');
+  typeTag.textContent = c.type === 'new' ? 'Nieuw' : c.type === 'test' ? 'Toets' : 'Herhaling';
+  typeTag.className = 'mc-tag ' + (c.type === 'new' ? 'new' : 'review');
+
+  // Question
+  const verbEl = document.getElementById('mc-verb');
+  const tenseEl = document.getElementById('mc-tense');
+
+  let correctAnswer;
+  let options;
+
+  if (dir === 'fr-nl') {
+    verbEl.innerHTML = highlightSpelling(c.verb, c.tense, c.personIdx, correctForm);
+    tenseEl.textContent = '';
+    correctAnswer = personLabel + ' (' + tenseLabel + ')';
+    const distractors = generateDistractors(c, correctAnswer, 'fr-nl');
+    options = [correctAnswer, ...distractors];
+  } else {
+    verbEl.textContent = c.verb.inf + ' — ' + personLabel;
+    tenseEl.textContent = '(' + tenseLabel + ')';
+    correctAnswer = correctForm;
+    const distractors = generateDistractors(c, correctAnswer, 'nl-fr');
+    options = [correctAnswer, ...distractors];
+  }
+
+  // Example
+  const exEl = document.getElementById('mc-example');
+  const exData = c.verb.examples && c.verb.examples[c.tense];
+  if (exData) {
+    exEl.innerHTML = exData.fr + '<span class="nl">' + exData.nl + '</span>';
+  } else {
+    const firstEx = c.verb.examples && Object.values(c.verb.examples)[0];
+    exEl.innerHTML = firstEx ? firstEx.fr + '<span class="nl">' + firstEx.nl + '</span>' : '';
+  }
+
+  // Shuffle options
+  shuffle(options);
+
+  // Render option buttons
+  const optionsEl = document.getElementById('mc-options');
+  optionsEl.innerHTML = '';
+  for (const opt of options) {
+    const btn = document.createElement('button');
+    btn.className = 'mc-opt';
+    btn.textContent = opt;
+    btn.dataset.answer = opt;
+    btn.dataset.correct = opt === correctAnswer ? '1' : '0';
+    btn.addEventListener('click', () => handleAnswer(btn, correctAnswer, c, dir));
+    optionsEl.appendChild(btn);
+  }
+
+  // Hide feedback & next
+  document.getElementById('mc-feedback').classList.remove('show');
+  document.getElementById('mc-next').style.display = 'none';
+
+  // Progress
+  document.getElementById('sess-fill').style.width = (session.idx / session.cards.length * 100) + '%';
+  document.getElementById('sess-counter').textContent = `${session.idx + 1} / ${session.cards.length}`;
+  document.getElementById('sess-info').textContent = c.type === 'new' ? 'Nieuw' : c.type === 'test' ? 'Toets' : 'Herhaling';
+
+  // Store current answer for keyboard
+  session.currentCorrect = correctAnswer;
+  session.currentCard = c;
+  session.currentDir = dir;
+}
+
+function highlightSpelling(verb, tense, personIdx, form) {
+  if (!verb.hl || !verb.hl[tense]) return form;
+  const hlPersons = verb.hl[tense];
+  if (!hlPersons.includes(personIdx)) return form;
+  return '<span class="spelling-hl">' + form + '</span>';
+}
+
+function handleAnswer(btn, correctAnswer, card, dir) {
+  if (session.answered) return;
+  session.answered = true;
+
+  const isCorrect = btn.dataset.correct === '1';
+  const allBtns = document.querySelectorAll('.mc-opt');
+
+  allBtns.forEach(b => {
+    b.classList.add('disabled');
+    if (b.dataset.correct === '1') b.classList.add('reveal-correct');
+  });
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    session.good++;
+    if (!session.isBlockTest) applyGrade(card.key, 2);
+  } else {
+    btn.classList.add('wrong');
+    session.bad++;
+    if (!session.isBlockTest) applyGrade(card.key, 0);
+  }
+
+  // Feedback
+  const fb = document.getElementById('mc-feedback');
+  const fbTitle = document.getElementById('mc-fb-title');
+  const fbRule = document.getElementById('mc-fb-rule');
+  fbTitle.textContent = isCorrect ? 'Correct!' : 'Fout — ' + correctAnswer;
+  fbTitle.className = 'mc-feedback-title ' + (isCorrect ? 'ok' : 'fail');
+  fbRule.textContent = card.verb.note || '';
+  fb.classList.add('show');
+
+  document.getElementById('mc-next').style.display = 'block';
+}
+
+function nextCard() {
+  if (!session) return;
+  session.idx++;
+  renderMCCard();
+}
+
+function finishSession() {
+  const totalAns = session.good + session.bad;
+  if (totalAns > 0) {
+    state.sessionStats.recentRatios.push(session.good / totalAns);
+    if (state.sessionStats.recentRatios.length > 10)
+      state.sessionStats.recentRatios = state.sessionStats.recentRatios.slice(-10);
+  }
+  state.lastSessionEnded = Date.now();
+  saveState();
+
+  if (session.isBlockTest) {
+    const ratio = totalAns > 0 ? session.good / totalAns : 0;
+    const bi = state.progress.currentBlock;
+    if (ratio >= BLOCK_TEST_PASS_PCT) {
+      state.progress.blockTestPassed[bi] = true;
+      if (bi < TOTAL_BLOCKS - 1) {
+        state.progress.currentBlock = bi + 1;
+        state.progress.currentSub = 0;
+        state.progress.currentPhase = 0;
+      }
+      saveState();
+      showScreen('screen-celebration');
+      document.getElementById('celeb-title').textContent = `${BLOCKS[bi].name} voltooid!`;
+      document.getElementById('celeb-text').textContent =
+        `Bravo! Je scoorde ${Math.round(ratio * 100)}%. Het volgende blok is ontgrendeld!`;
+      launchConfetti(4000);
+    } else {
+      showScreen('screen-summary');
+      document.getElementById('sum-title').textContent = 'Helaas, niet gehaald';
+      document.getElementById('sum-quote').textContent =
+        `Je scoorde ${Math.round(ratio * 100)}%. Je hebt 80% nodig. Oefen verder en probeer opnieuw!`;
+      document.getElementById('sum-good').textContent = session.good;
+      document.getElementById('sum-bad').textContent = session.bad;
+      document.getElementById('sum-cards').textContent = totalAns;
+    }
+    session = null;
+    return;
+  }
+
+  const completed = advanceIfComplete();
+  if (completed) {
+    if (completed.needsBlockTest) {
+      session = null;
+      const bi = completed.blockIdx;
+      document.getElementById('bt-title').textContent = `Bloktoets: ${BLOCKS[bi].name}`;
+      showScreen('screen-block-test');
+      return;
+    }
+    if (completed.allDone) {
+      showScreen('screen-celebration');
+      document.getElementById('celeb-title').textContent = 'Alle werkwoorden voltooid!';
+      document.getElementById('celeb-text').textContent =
+        'Magnifique! Je beheerst alle blokken. Blijf herhalen om het vast te houden!';
+      launchConfetti(5000);
+      session = null;
+      return;
+    }
+    if (completed.blockComplete) {
+      showScreen('screen-celebration');
+      document.getElementById('celeb-title').textContent = `${BLOCKS[completed.blockIdx].name} voltooid!`;
+      document.getElementById('celeb-text').textContent = `Geweldig! Door naar: ${BLOCKS[state.progress.currentBlock].name}`;
+      launchConfetti(4000);
+      session = null;
+      return;
+    }
+    if (completed.subComplete) {
+      const block = BLOCKS[completed.blockIdx];
+      showScreen('screen-celebration');
+      document.getElementById('celeb-title').textContent = `${block.subs[completed.subIdx].name} voltooid!`;
+      document.getElementById('celeb-text').textContent =
+        `Mooi werk! Door naar: ${block.subs[state.progress.currentSub].name}`;
+      launchConfetti(3000);
+      session = null;
+      return;
+    }
+  }
+
+  showScreen('screen-summary');
+  const ratio = totalAns > 0 ? session.good / totalAns : 0;
+  let title = 'Bien fait!';
+  if (ratio >= 0.95) { title = 'Magnifique!'; launchConfetti(3000); }
+  else if (ratio >= 0.8) { title = 'Très bien!'; launchConfetti(2000); }
+  else if (ratio >= 0.5) { title = 'Bien fait!'; }
+  else { title = 'Continue!'; }
+
+  document.getElementById('sum-title').textContent = title;
+  document.getElementById('sum-quote').textContent = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  document.getElementById('sum-good').textContent = session.good;
+  document.getElementById('sum-bad').textContent = session.bad;
+  document.getElementById('sum-cards').textContent = totalAns;
+  session = null;
+}
+
+function abortSession() {
+  if (!confirm('Sessie afbreken? Voortgang van geoefende kaarten blijft staan.')) return;
+  session = null;
+  renderHome();
+  showScreen('screen-home');
+}
+
+// ============================================================
+//   TENSE INFO SCREEN
+// ============================================================
+function showTenseInfoScreen(tenseKey) {
+  const info = TENSE_INFO[tenseKey];
+  if (!info) return;
+  const el = document.getElementById('tense-info-content');
+  el.innerHTML = `
+    <h2>${info.title}</h2>
+    <div class="usage">${info.usage}</div>
+    <div class="rule-box">
+      <div class="rule-title">Vormingsregel</div>
+      <div class="rule-text">${info.rule}</div>
+    </div>
+    <div class="example-box">
+      <div class="example-fr">${info.example.fr}</div>
+      <div class="example-nl">${info.example.nl}</div>
+    </div>
+  `;
+  showScreen('screen-tense-info');
+}
+
+// ============================================================
+//   CONFETTI
+// ============================================================
+function launchConfetti(duration) {
+  duration = duration || 3000;
+  const canvas = document.createElement('canvas');
+  canvas.className = 'confetti-canvas';
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ['#ff3b30','#af52de','#34c759','#ff9500','#5b8aff','#ffcc00','#6dd58c'];
+  const particles = [];
+  for (let i = 0; i < 120; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height * -0.5 - 20,
+      w: 6 + Math.random() * 6, h: 4 + Math.random() * 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vx: (Math.random() - 0.5) * 4, vy: 2 + Math.random() * 4,
+      rot: Math.random() * 360, rotV: (Math.random() - 0.5) * 12, opacity: 1
+    });
+  }
+  const start = Date.now();
+  function frame() {
+    const elapsed = Date.now() - start;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const fadeStart = duration * 0.7;
+    for (const p of particles) {
+      p.x += p.vx; p.vy += 0.08; p.y += p.vy; p.rot += p.rotV;
+      if (elapsed > fadeStart) p.opacity = Math.max(0, 1 - (elapsed - fadeStart) / (duration - fadeStart));
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
+      ctx.globalAlpha = p.opacity; ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+    }
+    if (elapsed < duration) requestAnimationFrame(frame);
+    else canvas.remove();
+  }
+  requestAnimationFrame(frame);
+}
+
+// ============================================================
+//   EVENT HANDLERS
+// ============================================================
+document.addEventListener('click', (e) => {
+  const action = e.target.closest('[data-action]');
+  if (!action) return;
+  const a = action.dataset.action;
+
+  switch (a) {
+    case 'start':
+      startSession(false);
+      break;
+    case 'start-block-test':
+      startSession(true);
+      break;
+    case 'next-card':
+      nextCard();
+      break;
+    case 'abort-session':
+      abortSession();
+      break;
+    case 'back-home':
+      renderHome();
+      showScreen('screen-home');
+      break;
+    case 'continue-from-celeb':
+      renderHome();
+      showScreen('screen-home');
+      break;
+    case 'open-settings':
+      showScreen('screen-settings');
+      break;
+    case 'show-tense-info': {
+      const bi = state.progress.currentBlock;
+      const block = BLOCKS[bi];
+      const tense = block ? (block.tenses || ['present'])[0] : 'present';
+      showTenseInfoScreen(tense);
+      break;
+    }
+    case 'close-tense-info':
+      if (session) showScreen('screen-session');
+      else { renderHome(); showScreen('screen-home'); }
+      break;
+    case 'export':
+      exportState();
+      break;
+    case 'import':
+      document.getElementById('import-file').click();
+      break;
+    case 'reset':
+      if (confirm('Weet je zeker dat je ALLE voortgang wilt wissen? Dit kan niet ongedaan worden.')) {
+        localStorage.removeItem(STORAGE_KEY);
+        state = defaultState();
+        saveState();
+        renderHome();
+        showScreen('screen-home');
+        toast('Voortgang gewist');
+      }
+      break;
+  }
+});
+
+document.getElementById('import-file').addEventListener('change', (e) => {
+  if (e.target.files[0]) importState(e.target.files[0]);
+  e.target.value = '';
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (!document.getElementById('screen-session').classList.contains('active')) return;
+  if (!session) return;
+  if (session.answered) {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); nextCard(); }
+    return;
+  }
+  if (e.key >= '1' && e.key <= '4') {
+    const btns = document.querySelectorAll('.mc-opt');
+    const idx = parseInt(e.key) - 1;
+    if (btns[idx]) btns[idx].click();
+  }
+});
+
+// ============================================================
+//   INIT
+// ============================================================
+loadState();
+renderHome();
+
+</script>
+</body>
+</html>
