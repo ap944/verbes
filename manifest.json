@@ -1,0 +1,17 @@
+{
+  "name": "Verbes",
+  "short_name": "Verbes",
+  "description": "Flashcard app voor Franse werkwoordsvervoegingen",
+  "start_url": "./verbes.html",
+  "display": "standalone",
+  "background_color": "#0a0c0f",
+  "theme_color": "#3a7d44",
+  "icons": [
+    {
+      "src": "verbes_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
