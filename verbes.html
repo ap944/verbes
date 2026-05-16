@@ -348,7 +348,18 @@ html, body {
   font-size: 12px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
 }
 .tense-info .rule-box .rule-text {
-  font-size: 15px; color: var(--ink); font-weight: 500;
+  font-size: 15px; color: var(--ink); font-weight: 500; margin-bottom: 8px;
+}
+.tense-info .conj-table {
+  width: 100%; border-collapse: collapse; margin-top: 10px;
+}
+.tense-info .conj-table tr { border-bottom: 1px solid var(--line); }
+.tense-info .conj-table tr:last-child { border-bottom: none; }
+.tense-info .conj-table td { padding: 6px 0; font-size: 15px; }
+.tense-info .conj-person { color: var(--ink-soft); width: 45%; }
+.tense-info .conj-ending { color: var(--primary-light); font-weight: 600; }
+.tense-info .rule-note {
+  font-size: 13px; color: var(--ink-faint); margin-top: 8px; font-style: italic;
 }
 .tense-info .example-box {
   background: var(--bg-soft); border-radius: 12px; padding: 14px 16px;
@@ -633,61 +644,75 @@ const TENSE_INFO = {
   present: {
     title: 'Le présent',
     usage: 'Je gebruikt de présent als je iets wilt beschrijven in het heden. Het drukt uit wat er nu gebeurt, een gewoonte, of een algemene waarheid.',
-    rule: 'Regelmatig: stam + uitgangen (-e, -es, -e, -ons, -ez, -ent voor -er)',
+    formation: 'Regelmatig: stam + uitgangen',
+    endings: ['-e','-es','-e','-ons','-ez','-ent'],
+    endingsNote: 'voor -er werkwoorden',
     example: { fr: 'Je parle français.', nl: 'Ik spreek Frans.' }
   },
   imparfait: {
     title: 'L\'imparfait',
     usage: 'Je gebruikt de imparfait als je iets wilt beschrijven uit het verleden: een situatie, gewoonte, of achtergrond. Het is de "beschrijvende verleden tijd".',
-    rule: 'Nous-vorm présent, vervang -ons door: -ais, -ais, -ait, -ions, -iez, -aient',
+    formation: 'Nous-vorm présent → vervang -ons door:',
+    endings: ['-ais','-ais','-ait','-ions','-iez','-aient'],
     example: { fr: 'Je parlais avec mon ami.', nl: 'Ik praatte met mijn vriend.' }
   },
   futur: {
     title: 'Le futur simple',
     usage: 'De futur simple gebruik je voor de toekomst, vooral in formele of schriftelijke contexten. In spreektaal gebruik je vaker de futur proche.',
-    rule: 'Hele werkwoord + -ai, -as, -a, -ons, -ez, -ont',
+    formation: 'Hele werkwoord + uitgangen:',
+    endings: ['-ai','-as','-a','-ons','-ez','-ont'],
     example: { fr: 'Je parlerai demain.', nl: 'Ik zal morgen spreken.' }
   },
   conditionnel: {
     title: 'Le conditionnel',
     usage: 'De conditionnel gebruik je voor beleefdheid, wensen, en voorwaardelijke zinnen ("als... zou"). De uitgangen zijn dezelfde als de imparfait.',
-    rule: 'Hele werkwoord + -ais, -ais, -ait, -ions, -iez, -aient',
+    formation: 'Hele werkwoord + uitgangen:',
+    endings: ['-ais','-ais','-ait','-ions','-iez','-aient'],
     example: { fr: 'Je voudrais un café.', nl: 'Ik zou graag een koffie willen.' }
   },
   subjonctif: {
     title: 'Le subjonctif',
     usage: 'De subjonctif gebruik je na uitdrukkingen van wens, twijfel, noodzaak, of emotie. Vaak na "que": il faut que, je veux que, bien que...',
-    rule: 'Ils-vorm présent → stam + -e, -es, -e, -ions, -iez, -ent',
+    formation: 'Ils-vorm présent → stam + uitgangen:',
+    endings: ['-e','-es','-e','-ions','-iez','-ent'],
     example: { fr: 'Il faut que je parle.', nl: 'Ik moet spreken.' }
   },
   passeCompose: {
     title: 'Le passé composé',
     usage: 'De passé composé gebruik je voor afgeronde acties in het verleden: iets dat begon én eindigde. Het is de "voltooide verleden tijd".',
-    rule: 'Hulpwerkwoord (avoir/être in présent) + voltooid deelwoord',
+    formation: 'Hulpwerkwoord (avoir/être) + voltooid deelwoord',
+    endings: null,
     example: { fr: 'J\'ai parlé français.', nl: 'Ik heb Frans gesproken.' }
   },
   imperatif: {
     title: 'L\'impératif',
     usage: 'De impératif gebruik je om een bevel, verzoek, of aanmoediging te geven. Alleen voor tu, nous, en vous — zonder het onderwerp te noemen.',
-    rule: 'Présent-vorm zonder onderwerp. Bij -er: tu-vorm zonder -s (parle!)',
+    formation: 'Présent-vorm zonder onderwerp. Bij -er: tu-vorm zonder -s',
+    endings: null,
+    endingsNote: 'parle! parlons! parlez!',
     example: { fr: 'Parle français!', nl: 'Spreek Frans!' }
   },
   passeSimple: {
     title: 'Le passé simple',
     usage: 'De passé simple is een literaire tijd. Je vindt hem in boeken en kranten, maar je gebruikt hem zelf niet in spreektaal. Alleen herkennen is voldoende.',
-    rule: 'Stam + -ai/-as/-a/-âmes/-âtes/-èrent (-er), -is/-it/-îmes/-îtes/-irent (-ir/-re)',
+    formation: '-er werkwoorden: stam + uitgangen:',
+    endings: ['-ai','-as','-a','-âmes','-âtes','-èrent'],
+    endingsNote: '-ir/-re: -is, -is, -it, -îmes, -îtes, -irent',
     example: { fr: 'Il parla longtemps.', nl: 'Hij sprak lang.' }
   },
   futProche: {
     title: 'Le futur proche',
-    usage: 'De futur proche gebruik je voor de nabije toekomst ("ik ga...""). Het is de meest gebruikte toekomsttijd in spreektaal.',
-    rule: 'Aller (présent) + infinitief',
+    usage: 'De futur proche gebruik je voor de nabije toekomst ("ik ga..."). Het is de meest gebruikte toekomsttijd in spreektaal.',
+    formation: 'Aller (présent) + infinitief',
+    endings: null,
     example: { fr: 'Je vais parler.', nl: 'Ik ga spreken.' }
   },
   partPresent: {
     title: 'Le participe présent / gérondif',
     usage: 'Het participe présent beschrijft een gelijktijdige handeling. Het gérondif (en + participe présent) geeft aan "terwijl je...".',
-    rule: 'Nous-vorm présent, vervang -ons door -ant. Gérondif: en + ...ant',
+    formation: 'Nous-vorm présent → vervang -ons door -ant',
+    endings: null,
+    endingsNote: 'Gérondif: en + ...ant',
     example: { fr: 'En parlant, il sourit.', nl: 'Al sprekend glimlachte hij.' }
   }
 };
@@ -2118,22 +2143,20 @@ function handleAnswer(btn, correctAnswer, card, dir) {
     btn.classList.add('correct');
     session.good++;
     if (!session.isBlockTest) applyGrade(card.key, 2);
+    setTimeout(nextCard, 600);
   } else {
     btn.classList.add('wrong');
     session.bad++;
     if (!session.isBlockTest) applyGrade(card.key, 0);
+    const fb = document.getElementById('mc-feedback');
+    const fbTitle = document.getElementById('mc-fb-title');
+    const fbRule = document.getElementById('mc-fb-rule');
+    fbTitle.textContent = 'Fout — ' + correctAnswer;
+    fbTitle.className = 'mc-feedback-title fail';
+    fbRule.textContent = card.verb.note || '';
+    fb.classList.add('show');
+    document.getElementById('mc-next').style.display = 'block';
   }
-
-  // Feedback
-  const fb = document.getElementById('mc-feedback');
-  const fbTitle = document.getElementById('mc-fb-title');
-  const fbRule = document.getElementById('mc-fb-rule');
-  fbTitle.textContent = isCorrect ? 'Correct!' : 'Fout — ' + correctAnswer;
-  fbTitle.className = 'mc-feedback-title ' + (isCorrect ? 'ok' : 'fail');
-  fbRule.textContent = card.verb.note || '';
-  fb.classList.add('show');
-
-  document.getElementById('mc-next').style.display = 'block';
 }
 
 function nextCard() {
@@ -2249,13 +2272,28 @@ function showTenseInfoScreen(tenseKey) {
   const info = TENSE_INFO[tenseKey];
   if (!info) return;
   const el = document.getElementById('tense-info-content');
+  const persons = ['je','tu','il/elle','nous','vous','ils/elles'];
+  let ruleHTML = '';
+  if (info.endings) {
+    ruleHTML = `<div class="rule-box">
+      <div class="rule-title">Vormingsregel</div>
+      <div class="rule-text">${info.formation}</div>
+      <table class="conj-table">
+        ${info.endings.map((e,i) => `<tr><td class="conj-person">${persons[i]}</td><td class="conj-ending">${e}</td></tr>`).join('')}
+      </table>
+      ${info.endingsNote ? `<div class="rule-note">${info.endingsNote}</div>` : ''}
+    </div>`;
+  } else {
+    ruleHTML = `<div class="rule-box">
+      <div class="rule-title">Vormingsregel</div>
+      <div class="rule-text">${info.formation}</div>
+      ${info.endingsNote ? `<div class="rule-note">${info.endingsNote}</div>` : ''}
+    </div>`;
+  }
   el.innerHTML = `
     <h2>${info.title}</h2>
     <div class="usage">${info.usage}</div>
-    <div class="rule-box">
-      <div class="rule-title">Vormingsregel</div>
-      <div class="rule-text">${info.rule}</div>
-    </div>
+    ${ruleHTML}
     <div class="example-box">
       <div class="example-fr">${info.example.fr}</div>
       <div class="example-nl">${info.example.nl}</div>
