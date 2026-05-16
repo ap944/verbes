@@ -348,7 +348,10 @@ html, body {
   font-size: 12px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
 }
 .tense-info .rule-box .rule-text {
-  font-size: 15px; color: var(--ink); font-weight: 500; margin-bottom: 8px;
+  font-size: 15px; color: var(--ink); font-weight: 700; margin-bottom: 4px;
+}
+.tense-info .rule-box .rule-detail {
+  font-size: 14px; color: var(--ink-soft); font-weight: 400; margin-bottom: 8px;
 }
 .tense-info .conj-table {
   width: 100%; border-collapse: collapse; margin-top: 10px;
@@ -644,50 +647,56 @@ const TENSE_INFO = {
   present: {
     title: 'Le présent',
     usage: 'Je gebruikt de présent als je iets wilt beschrijven in het heden. Het drukt uit wat er nu gebeurt, een gewoonte, of een algemene waarheid.',
-    formation: 'Regelmatig: stam + uitgangen',
+    rule: 'Werkwoorden op -er: stam + uitgang.',
+    detail: 'stam = infinitief − -er',
     endings: ['-e','-es','-e','-ons','-ez','-ent'],
-    endingsNote: 'voor -er werkwoorden',
     example: { fr: 'Je parle français.', nl: 'Ik spreek Frans.' }
   },
   imparfait: {
     title: 'L\'imparfait',
     usage: 'Je gebruikt de imparfait als je iets wilt beschrijven uit het verleden: een situatie, gewoonte, of achtergrond. Het is de "beschrijvende verleden tijd".',
-    formation: 'Nous-vorm présent → vervang -ons door:',
+    rule: 'Nous-vorm présent minus -ons + uitgang.',
+    detail: 'parlons → parl- + uitgang',
     endings: ['-ais','-ais','-ait','-ions','-iez','-aient'],
     example: { fr: 'Je parlais avec mon ami.', nl: 'Ik praatte met mijn vriend.' }
   },
   futur: {
     title: 'Le futur simple',
     usage: 'De futur simple gebruik je voor de toekomst, vooral in formele of schriftelijke contexten. In spreektaal gebruik je vaker de futur proche.',
-    formation: 'Hele werkwoord + uitgangen:',
+    rule: 'Hele infinitief + uitgang.',
+    detail: 'parler + -ai = parlerai',
     endings: ['-ai','-as','-a','-ons','-ez','-ont'],
     example: { fr: 'Je parlerai demain.', nl: 'Ik zal morgen spreken.' }
   },
   conditionnel: {
     title: 'Le conditionnel',
-    usage: 'De conditionnel gebruik je voor beleefdheid, wensen, en voorwaardelijke zinnen ("als... zou"). De uitgangen zijn dezelfde als de imparfait.',
-    formation: 'Hele werkwoord + uitgangen:',
+    usage: 'De conditionnel gebruik je voor beleefdheid, wensen, en voorwaardelijke zinnen ("als... zou").',
+    rule: 'Hele infinitief + imparfait-uitgangen.',
+    detail: 'parler + -ais = parlerais',
     endings: ['-ais','-ais','-ait','-ions','-iez','-aient'],
     example: { fr: 'Je voudrais un café.', nl: 'Ik zou graag een koffie willen.' }
   },
   subjonctif: {
     title: 'Le subjonctif',
     usage: 'De subjonctif gebruik je na uitdrukkingen van wens, twijfel, noodzaak, of emotie. Vaak na "que": il faut que, je veux que, bien que...',
-    formation: 'Ils-vorm présent → stam + uitgangen:',
+    rule: 'Ils-vorm présent minus -ent + uitgang.',
+    detail: 'parlent → parl- + uitgang',
     endings: ['-e','-es','-e','-ions','-iez','-ent'],
     example: { fr: 'Il faut que je parle.', nl: 'Ik moet spreken.' }
   },
   passeCompose: {
     title: 'Le passé composé',
     usage: 'De passé composé gebruik je voor afgeronde acties in het verleden: iets dat begon én eindigde. Het is de "voltooide verleden tijd".',
-    formation: 'Hulpwerkwoord (avoir/être) + voltooid deelwoord',
+    rule: 'Avoir/être (présent) + voltooid deelwoord.',
+    detail: 'Bij être past het deelwoord zich aan: +e (vrouwelijk), +s (meervoud). Bijv: il est allé, elle est allée.',
     endings: null,
     example: { fr: 'J\'ai parlé français.', nl: 'Ik heb Frans gesproken.' }
   },
   imperatif: {
     title: 'L\'impératif',
     usage: 'De impératif gebruik je om een bevel, verzoek, of aanmoediging te geven. Alleen voor tu, nous, en vous — zonder het onderwerp te noemen.',
-    formation: 'Présent-vorm zonder onderwerp. Bij -er: tu-vorm zonder -s',
+    rule: 'Présent-vorm zonder onderwerp.',
+    detail: 'Bij -er: tu-vorm verliest de -s (tu parles → parle!).',
     endings: null,
     endingsNote: 'parle! parlons! parlez!',
     example: { fr: 'Parle français!', nl: 'Spreek Frans!' }
@@ -695,24 +704,26 @@ const TENSE_INFO = {
   passeSimple: {
     title: 'Le passé simple',
     usage: 'De passé simple is een literaire tijd. Je vindt hem in boeken en kranten, maar je gebruikt hem zelf niet in spreektaal. Alleen herkennen is voldoende.',
-    formation: '-er werkwoorden: stam + uitgangen:',
+    rule: 'Stam + uitgang.',
+    detail: 'parler → parl- + -a = parla, finir → fin- + -it = finit, rendre → rend- + -it = rendit.',
     endings: ['-ai','-as','-a','-âmes','-âtes','-èrent'],
-    endingsNote: '-ir/-re: -is, -is, -it, -îmes, -îtes, -irent',
+    endingsNote: 'Werkwoorden op -ir/-re: -is, -is, -it, -îmes, -îtes, -irent',
     example: { fr: 'Il parla longtemps.', nl: 'Hij sprak lang.' }
   },
   futProche: {
     title: 'Le futur proche',
     usage: 'De futur proche gebruik je voor de nabije toekomst ("ik ga..."). Het is de meest gebruikte toekomsttijd in spreektaal.',
-    formation: 'Aller (présent) + infinitief',
+    rule: 'Aller (présent) + infinitief.',
+    detail: 'je vais parler = ik ga spreken',
     endings: null,
     example: { fr: 'Je vais parler.', nl: 'Ik ga spreken.' }
   },
   partPresent: {
     title: 'Le participe présent / gérondif',
     usage: 'Het participe présent beschrijft een gelijktijdige handeling. Het gérondif (en + participe présent) geeft aan "terwijl je...".',
-    formation: 'Nous-vorm présent → vervang -ons door -ant',
+    rule: 'Nous-vorm présent minus -ons + -ant.',
+    detail: 'parlons → parlant. Gérondif: en + parlant.',
     endings: null,
-    endingsNote: 'Gérondif: en + ...ant',
     example: { fr: 'En parlant, il sourit.', nl: 'Al sprekend glimlachte hij.' }
   }
 };
@@ -1610,13 +1621,18 @@ function importState(file) {
 // ============================================================
 const DAY = 24 * 60 * 60 * 1000;
 
-function applyGrade(key, grade) {
+function applyGrade(key, grade, isReview) {
   const c = getCardData(key);
   c.lastSeen = Date.now();
   if (grade === 0) {
     c.lapses += 1; c.reps = 0; c.interval = 0; c.streak = 0;
     c.ease = Math.max(1.3, c.ease - 0.2);
     c.due = Date.now() + 60000;
+    if (isReview) {
+      c.phaseProgress = Math.min(c.phaseProgress || 0, 4);
+    } else {
+      c.phaseProgress = 0;
+    }
   } else {
     c.reps += 1; c.streak = (c.streak || 0) + 1;
     if (grade === 1) {
@@ -1759,8 +1775,6 @@ function advanceIfComplete() {
 function pickSessionCards() {
   const bi = state.progress.currentBlock;
   const si = state.progress.currentSub;
-  const phase = state.progress.currentPhase;
-  const dir = getPhaseDirection(phase);
   const now = Date.now();
 
   const ratios = (state.sessionStats.recentRatios || []).slice(-5);
@@ -1775,7 +1789,8 @@ function pickSessionCards() {
     const key = cardKey(c.verb, c.tense, c.personIdx);
     const cd = getCardData(key);
     if (cd.phaseProgress < PHASES_PER_SUB) {
-      newCards.push({ ...c, key, dir, type: 'new' });
+      const cardDir = getPhaseDirection(cd.phaseProgress || 0);
+      newCards.push({ ...c, key, dir: cardDir, type: 'new' });
     }
   }
 
@@ -1813,7 +1828,9 @@ function pickSessionCards() {
   if (session.length === 0) {
     for (const c of subCards) {
       const key = cardKey(c.verb, c.tense, c.personIdx);
-      session.push({ ...c, key, dir, type: 'review' });
+      const cd = getCardData(key);
+      const fallbackDir = getPhaseDirection(cd.phaseProgress || 0);
+      session.push({ ...c, key, dir: fallbackDir, type: 'review' });
       if (session.length >= SESSION_LENGTH) break;
     }
   }
@@ -2142,12 +2159,12 @@ function handleAnswer(btn, correctAnswer, card, dir) {
   if (isCorrect) {
     btn.classList.add('correct');
     session.good++;
-    if (!session.isBlockTest) applyGrade(card.key, 2);
+    if (!session.isBlockTest) applyGrade(card.key, 2, card.type === 'review');
     setTimeout(nextCard, 600);
   } else {
     btn.classList.add('wrong');
     session.bad++;
-    if (!session.isBlockTest) applyGrade(card.key, 0);
+    if (!session.isBlockTest) applyGrade(card.key, 0, card.type === 'review');
     const fb = document.getElementById('mc-feedback');
     const fbTitle = document.getElementById('mc-fb-title');
     const fbRule = document.getElementById('mc-fb-rule');
@@ -2274,10 +2291,12 @@ function showTenseInfoScreen(tenseKey) {
   const el = document.getElementById('tense-info-content');
   const persons = ['je','tu','il/elle','nous','vous','ils/elles'];
   let ruleHTML = '';
+  const ruleBody = `<div class="rule-title">Vormingsregel</div>
+      <div class="rule-text">${info.rule}</div>
+      ${info.detail ? `<div class="rule-detail">${info.detail}</div>` : ''}`;
   if (info.endings) {
     ruleHTML = `<div class="rule-box">
-      <div class="rule-title">Vormingsregel</div>
-      <div class="rule-text">${info.formation}</div>
+      ${ruleBody}
       <table class="conj-table">
         ${info.endings.map((e,i) => `<tr><td class="conj-person">${persons[i]}</td><td class="conj-ending">${e}</td></tr>`).join('')}
       </table>
@@ -2285,8 +2304,7 @@ function showTenseInfoScreen(tenseKey) {
     </div>`;
   } else {
     ruleHTML = `<div class="rule-box">
-      <div class="rule-title">Vormingsregel</div>
-      <div class="rule-text">${info.formation}</div>
+      ${ruleBody}
       ${info.endingsNote ? `<div class="rule-note">${info.endingsNote}</div>` : ''}
     </div>`;
   }
