@@ -33,7 +33,6 @@
   --green: #34c759;
   --green-dark: #1a5c28;
   --gold: #f0a500;
-  --amber: #f0a500;
   --blue: #5b8aff;
 }
 @supports (color: color(display-p3 0 0 0)) {
@@ -186,7 +185,7 @@ html, body {
   font-size: 28px; font-weight: 700; color: var(--ink);
   margin-bottom: 4px; line-height: 1.2;
 }
-.mc-verb .spelling-hl { color: var(--amber); }
+.mc-verb .spelling-hl { color: var(--gold); }
 .mc-tense {
   font-size: 14px; color: var(--ink-soft); font-style: italic;
 }
@@ -1459,12 +1458,13 @@ const BLOCKS = [
 ];
 
 const TOTAL_BLOCKS = BLOCKS.length;
+const VERB_MAP = Object.fromEntries(VERBS.map(v => [v.inf, v]));
 
 // ============================================================
 //   HELPER: Build flat card list for a sub-block
 // ============================================================
 function getVerbByInf(inf) {
-  return VERBS.find(v => v.inf === inf);
+  return VERB_MAP[inf];
 }
 
 function getSubBlockCards(blockIdx, subIdx) {
@@ -1505,17 +1505,13 @@ function cardKey(verb, tense, personIdx) {
 // ============================================================
 //   PASSÉ COMPOSÉ & FUTUR PROCHE HELPERS
 // ============================================================
-const AVOIR_PRESENT = ['ai','as','a','avons','avez','ont'];
-const ETRE_PRESENT = ['suis','es','est','sommes','êtes','sont'];
-const ALLER_PRESENT = ['vais','vas','va','allons','allez','vont'];
-
 function getPasseComposeForm(verb, personIdx) {
-  const auxForms = verb.aux === 'être' ? ETRE_PRESENT : AVOIR_PRESENT;
-  return auxForms[personIdx] + ' ' + verb.pp;
+  const auxVerb = VERB_MAP[verb.aux === 'être' ? 'être' : 'avoir'];
+  return auxVerb.conj.present[personIdx] + ' ' + verb.pp;
 }
 
 function getFutProcheForm(verb, personIdx) {
-  return ALLER_PRESENT[personIdx] + ' ' + verb.inf;
+  return VERB_MAP['aller'].conj.present[personIdx] + ' ' + verb.inf;
 }
 
 function getConjugation(verb, tense, personIdx) {
@@ -1551,7 +1547,6 @@ function defaultState() {
     progress: {
       currentBlock: 0,
       currentSub: 0,
-      currentPhase: 0,
       blockTestPassed: new Array(TOTAL_BLOCKS).fill(false),
     },
     cards: {},
@@ -1748,7 +1743,6 @@ function advanceIfComplete() {
   if (isSubBlockComplete(bi, si)) {
     if (si < block.subs.length - 1) {
       state.progress.currentSub = si + 1;
-      state.progress.currentPhase = 0;
       saveState();
       return { subComplete: true, blockIdx: bi, subIdx: si };
     }
@@ -1759,7 +1753,6 @@ function advanceIfComplete() {
       if (bi < TOTAL_BLOCKS - 1) {
         state.progress.currentBlock = bi + 1;
         state.progress.currentSub = 0;
-        state.progress.currentPhase = 0;
         saveState();
         return { blockComplete: true, blockIdx: bi };
       }
@@ -1849,37 +1842,49 @@ function shuffle(arr) {
 // ============================================================
 //   DISTRACTOR GENERATION
 // ============================================================
+function getAlsoCorrectPersons(verb, tense, personIdx) {
+  const targetForm = getConjugation(verb, tense, personIdx);
+  const also = [];
+  for (let p = 0; p < 6; p++) {
+    if (p === personIdx) continue;
+    if (getConjugation(verb, tense, p) === targetForm) also.push(p);
+  }
+  return also;
+}
+
 function generateDistractors(card, correctAnswer, dir) {
   const distractors = new Set();
   const verb = card.verb;
   const tense = card.tense;
 
   if (dir === 'fr-nl') {
-    const correct = getPersonLabel(tense, card.personIdx) + ' (' + getTenseLabel(tense) + ')';
+    const correctForm = getConjugation(verb, tense, card.personIdx);
+    const sameFormPersons = new Set([card.personIdx, ...getAlsoCorrectPersons(verb, tense, card.personIdx)]);
     const allTenses = Object.keys(verb.conj);
     for (let p = 0; p < 6; p++) {
-      if (p === card.personIdx) continue;
+      if (sameFormPersons.has(p)) continue;
       const label = PERSONS[p] + ' (' + getTenseLabel(tense) + ')';
-      if (label !== correct) distractors.add(label);
+      distractors.add(label);
     }
     for (const t of allTenses) {
       if (t === tense) continue;
       const label = getPersonLabel(t, card.personIdx) + ' (' + getTenseLabel(t) + ')';
-      if (label !== correct) distractors.add(label);
+      if (label !== correctAnswer) distractors.add(label);
     }
   } else {
+    const correctForm = getConjugation(verb, tense, card.personIdx);
     const forms = verb.conj[tense];
     if (forms) {
       for (let p = 0; p < 6; p++) {
         if (p === card.personIdx) continue;
         const f = getConjugation(verb, tense, p);
-        if (f && f !== correctAnswer) distractors.add(f);
+        if (f && f !== correctForm) distractors.add(f);
       }
     }
     const otherTenses = Object.keys(verb.conj).filter(t => t !== tense);
     for (const t of otherTenses) {
       const f = getConjugation(verb, t, card.personIdx);
-      if (f && f !== correctAnswer) distractors.add(f);
+      if (f && f !== correctForm) distractors.add(f);
     }
   }
 
@@ -1933,40 +1938,13 @@ function renderHome() {
     <stop offset="60%" stop-color="#f5d442"/><stop offset="100%" stop-color="#d4a017"/>
   </linearGradient></defs>`;
 
-  // Outer ring: 8 main blocks
-  const outerCount = TOTAL_BLOCKS;
-  const outerAngle = (2 * Math.PI) / outerCount;
-  for (let i = 0; i < outerCount; i++) {
-    const startA = i * outerAngle + gap / 2;
-    const endA = (i + 1) * outerAngle - gap / 2;
-    const status = getBlockStatus(i);
-    const d = sectorPath(cx, cy, 130, 155, startA, endA);
-    let fill, stroke = 'none', sw = 0, opacity = 1;
-    switch (status) {
-      case 'locked': fill = COL.locked; opacity = 0.5; break;
-      case 'empty': fill = COL.empty; break;
-      case 'fr-nl': fill = COL.bg; stroke = COL['fr-nl']; sw = 2; break;
-      case 'nl-fr': fill = COL['nl-fr']; break;
-      case 'mix': fill = COL.mix; break;
-      case 'gold': fill = COL.gold; break;
-      default: fill = COL.empty;
-    }
-    svg += `<path d="${d}" fill="${fill}" opacity="${opacity}"`;
-    if (sw > 0) svg += ` stroke="${stroke}" stroke-width="${sw}"`;
-    svg += '/>';
-  }
-
-  // Inner ring: sub-blocks of current main block
-  const bi = state.progress.currentBlock;
-  if (bi < TOTAL_BLOCKS) {
-    const block = BLOCKS[bi];
-    const innerCount = block.subs.length;
-    const innerAngle = (2 * Math.PI) / innerCount;
-    for (let i = 0; i < innerCount; i++) {
-      const startA = i * innerAngle + gap / 2;
-      const endA = (i + 1) * innerAngle - gap / 2;
-      const status = getSubBlockStatus(bi, i);
-      const d = sectorPath(cx, cy, 96, 124, startA, endA);
+  function drawRing(count, rIn, rOut, statusFn) {
+    const angle = (2 * Math.PI) / count;
+    for (let i = 0; i < count; i++) {
+      const startA = i * angle + gap / 2;
+      const endA = (i + 1) * angle - gap / 2;
+      const status = statusFn(i);
+      const d = sectorPath(cx, cy, rIn, rOut, startA, endA);
       let fill, stroke = 'none', sw = 0, opacity = 1;
       switch (status) {
         case 'locked': fill = COL.locked; opacity = 0.5; break;
@@ -1981,6 +1959,13 @@ function renderHome() {
       if (sw > 0) svg += ` stroke="${stroke}" stroke-width="${sw}"`;
       svg += '/>';
     }
+  }
+
+  drawRing(TOTAL_BLOCKS, 130, 155, i => getBlockStatus(i));
+
+  const bi = state.progress.currentBlock;
+  if (bi < TOTAL_BLOCKS) {
+    drawRing(BLOCKS[bi].subs.length, 96, 124, i => getSubBlockStatus(bi, i));
   }
 
   document.getElementById('circle-svg').innerHTML = svg;
@@ -2057,8 +2042,8 @@ function renderMCCard() {
   const c = session.cards[session.idx];
   session.answered = false;
 
-  const phase = state.progress.currentPhase || 0;
-  let dir = c.dir || getPhaseDirection(phase);
+  const cd = getCardData(c.key);
+  let dir = c.dir || getPhaseDirection(cd.phaseProgress || 0);
   if (dir === 'mix') dir = ['fr-nl', 'nl-fr', 'nl-fr'][Math.floor(Math.random() * 3)];
 
   const correctForm = getConjugation(c.verb, c.tense, c.personIdx);
@@ -2082,10 +2067,16 @@ function renderMCCard() {
   let correctAnswer;
   let options;
 
+  let alsoCorrectSet = new Set();
+
   if (dir === 'fr-nl') {
     verbEl.innerHTML = highlightSpelling(c.verb, c.tense, c.personIdx, correctForm);
     tenseEl.textContent = '';
     correctAnswer = personLabel + ' (' + tenseLabel + ')';
+    const alsoPers = getAlsoCorrectPersons(c.verb, c.tense, c.personIdx);
+    for (const p of alsoPers) {
+      alsoCorrectSet.add(PERSONS[p] + ' (' + tenseLabel + ')');
+    }
     const distractors = generateDistractors(c, correctAnswer, 'fr-nl');
     options = [correctAnswer, ...distractors];
   } else {
@@ -2117,7 +2108,7 @@ function renderMCCard() {
     btn.className = 'mc-opt';
     btn.textContent = opt;
     btn.dataset.answer = opt;
-    btn.dataset.correct = opt === correctAnswer ? '1' : '0';
+    btn.dataset.correct = (opt === correctAnswer || alsoCorrectSet.has(opt)) ? '1' : '0';
     btn.addEventListener('click', () => handleAnswer(btn, correctAnswer, c, dir));
     optionsEl.appendChild(btn);
   }
@@ -2135,6 +2126,7 @@ function renderMCCard() {
   session.currentCorrect = correctAnswer;
   session.currentCard = c;
   session.currentDir = dir;
+  session.alsoCorrectSet = alsoCorrectSet;
 }
 
 function highlightSpelling(verb, tense, personIdx, form) {
@@ -2168,7 +2160,10 @@ function handleAnswer(btn, correctAnswer, card, dir) {
     const fb = document.getElementById('mc-feedback');
     const fbTitle = document.getElementById('mc-fb-title');
     const fbRule = document.getElementById('mc-fb-rule');
-    fbTitle.textContent = 'Fout — ' + correctAnswer;
+    const also = session.alsoCorrectSet && session.alsoCorrectSet.size > 0
+      ? ' / ' + Array.from(session.alsoCorrectSet).join(' / ')
+      : '';
+    fbTitle.textContent = 'Fout — ' + correctAnswer + also;
     fbTitle.className = 'mc-feedback-title fail';
     fbRule.textContent = card.verb.note || '';
     fb.classList.add('show');
@@ -2200,7 +2195,6 @@ function finishSession() {
       if (bi < TOTAL_BLOCKS - 1) {
         state.progress.currentBlock = bi + 1;
         state.progress.currentSub = 0;
-        state.progress.currentPhase = 0;
       }
       saveState();
       showScreen('screen-celebration');
@@ -2289,7 +2283,6 @@ function showTenseInfoScreen(tenseKey) {
   const info = TENSE_INFO[tenseKey];
   if (!info) return;
   const el = document.getElementById('tense-info-content');
-  const persons = ['je','tu','il/elle','nous','vous','ils/elles'];
   let ruleHTML = '';
   const ruleBody = `<div class="rule-title">Vormingsregel</div>
       <div class="rule-text">${info.rule}</div>
@@ -2298,7 +2291,7 @@ function showTenseInfoScreen(tenseKey) {
     ruleHTML = `<div class="rule-box">
       ${ruleBody}
       <table class="conj-table">
-        ${info.endings.map((e,i) => `<tr><td class="conj-person">${persons[i]}</td><td class="conj-ending">${e}</td></tr>`).join('')}
+        ${info.endings.map((e,i) => `<tr><td class="conj-person">${PERSONS[i]}</td><td class="conj-ending">${e}</td></tr>`).join('')}
       </table>
       ${info.endingsNote ? `<div class="rule-note">${info.endingsNote}</div>` : ''}
     </div>`;
@@ -2383,9 +2376,6 @@ document.addEventListener('click', (e) => {
       abortSession();
       break;
     case 'back-home':
-      renderHome();
-      showScreen('screen-home');
-      break;
     case 'continue-from-celeb':
       renderHome();
       showScreen('screen-home');
