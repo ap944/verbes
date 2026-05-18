@@ -2010,7 +2010,7 @@ function startSession(isBlockTest) {
     if (mainTense !== 'present' && !state.tenseInfoSeen[bi]) {
       state.tenseInfoSeen[bi] = true;
       saveState();
-      showTenseInfoScreen(mainTense);
+      showTenseInfoForBlock(bi);
       setTimeout(() => {
         actuallyStartSession(cards, isBlockTest);
       }, 0);
@@ -2165,7 +2165,7 @@ function handleAnswer(btn, correctAnswer, card, dir) {
       : '';
     fbTitle.textContent = 'Fout — ' + correctAnswer + also;
     fbTitle.className = 'mc-feedback-title fail';
-    fbRule.textContent = card.verb.note || '';
+    fbRule.textContent = getVerbRuleText(card.verb, card.tense);
     fb.classList.add('show');
     document.getElementById('mc-next').style.display = 'block';
   }
@@ -2279,37 +2279,164 @@ function abortSession() {
 // ============================================================
 //   TENSE INFO SCREEN
 // ============================================================
-function showTenseInfoScreen(tenseKey) {
-  const info = TENSE_INFO[tenseKey];
-  if (!info) return;
-  const el = document.getElementById('tense-info-content');
+function getVerbTenseRule(verb, tense) {
+  const t = verb.type;
+  const inf = verb.inf;
+  const forms = verb.conj[tense];
+  if (t === 'auxiliary' || t === 'irregular' || t === 'impersonal') {
+    if (!forms) return null;
+    return { rule: `${inf} — onregelmatig`, detail: 'Uit het hoofd leren.',
+      endings: null, forms: forms, note: verb.note || null };
+  }
+  if (t === 'reflexive') {
+    const base = inf.replace(/^se\s+/, '');
+    if (!forms) return null;
+    return { rule: `Wederkerend: se + ${base}`, detail: `Voornaamwoord past zich aan: me, te, se, nous, vous, se.`,
+      endings: null, forms: forms, note: verb.note || null };
+  }
+  const RULES = {
+    present: {
+      'regular-er': { rule: `Présent -er: stam + uitgang`, detail: `stam = ${inf} − -er → ${inf.slice(0,-2)}-`, endings: ['-e','-es','-e','-ons','-ez','-ent'] },
+      'regular-ir': { rule: `Présent -ir: stam + -iss- + uitgang`, detail: `stam = ${inf} − -ir → ${inf.slice(0,-2)}-`, endings: ['-is','-is','-it','-issons','-issez','-issent'] },
+      'regular-re': { rule: `Présent -re: stam + uitgang`, detail: `stam = ${inf} − -re → ${inf.slice(0,-2)}-`, endings: ['-s','-s','—','-ons','-ez','-ent'] },
+    },
+    imparfait: {
+      _default: { rule: `Imparfait: nous-stam présent + uitgang`, detail: `${inf} → nous-vorm minus -ons + uitgang`, endings: ['-ais','-ais','-ait','-ions','-iez','-aient'] },
+    },
+    futur: {
+      'regular-er': { rule: `Futur simple: infinitief + uitgang`, detail: `${inf} + uitgang`, endings: ['-ai','-as','-a','-ons','-ez','-ont'] },
+      'regular-ir': { rule: `Futur simple: infinitief + uitgang`, detail: `${inf} + uitgang`, endings: ['-ai','-as','-a','-ons','-ez','-ont'] },
+      'regular-re': { rule: `Futur simple: infinitief − e + uitgang`, detail: `${inf.slice(0,-1)} + uitgang`, endings: ['-ai','-as','-a','-ons','-ez','-ont'] },
+    },
+    conditionnel: {
+      _default: { rule: `Conditionnel: futur-stam + imparfait-uitgangen`, detail: `${inf}${t === 'regular-re' ? ' (minus -e)' : ''} + uitgang`, endings: ['-ais','-ais','-ait','-ions','-iez','-aient'] },
+    },
+    subjonctif: {
+      _default: { rule: `Subjonctif: ils-stam présent + uitgang`, detail: `ils-vorm minus -ent + uitgang`, endings: ['-e','-es','-e','-ions','-iez','-ent'] },
+    },
+    passeCompose: {
+      _default: { rule: `Passé composé: ${verb.aux} (présent) + voltooid deelwoord`, detail: `deelwoord: ${verb.pp}${verb.aux === 'être' ? ' (past aan: +e/+s)' : ''}`, endings: null },
+    },
+    imperatif: {
+      _default: { rule: `Impératif: présent-vorm zonder onderwerp`, detail: t === 'regular-er' ? `Bij -er: tu-vorm verliest de -s` : `tu / nous / vous`, endings: null },
+    },
+    futProche: {
+      _default: { rule: `Futur proche: aller (présent) + infinitief`, detail: `vais/vas/va/allons/allez/vont + ${inf}`, endings: null },
+    },
+    passeSimple: {
+      'regular-er': { rule: `Passé simple -er: stam + uitgang`, detail: `${inf.slice(0,-2)}- + uitgang`, endings: ['-ai','-as','-a','-âmes','-âtes','-èrent'] },
+      'regular-ir': { rule: `Passé simple -ir: stam + uitgang`, detail: `${inf.slice(0,-2)}- + uitgang`, endings: ['-is','-is','-it','-îmes','-îtes','-irent'] },
+      'regular-re': { rule: `Passé simple -re: stam + uitgang`, detail: `${inf.slice(0,-2)}- + uitgang`, endings: ['-is','-is','-it','-îmes','-îtes','-irent'] },
+    },
+    partPresent: {
+      _default: { rule: `Participe présent: nous-stam + -ant`, detail: `${verb.ppres || ''}`, endings: null },
+    },
+  };
+  const tenseRules = RULES[tense];
+  if (!tenseRules) return null;
+  if (t === 'spelling') {
+    const base = tenseRules['regular-er'] || tenseRules['_default'];
+    if (!base) return null;
+    return { ...base, note: verb.note || null, forms: null,
+      detail: (base.detail ? base.detail + '. ' : '') + (verb.note || '') };
+  }
+  const r = tenseRules[t] || tenseRules['_default'];
+  if (!r) return null;
+  const result = { ...r, note: verb.note || null, forms: null };
+  return result;
+}
+
+function getVerbRuleText(verb, tense) {
+  const info = getVerbTenseRule(verb, tense);
+  if (!info) return '';
+  if (verb.type === 'spelling' && verb.note) return info.rule + ' — ' + verb.note;
+  return info.rule;
+}
+
+function renderTenseInfoHTML(verb, tense) {
+  const baseInfo = TENSE_INFO[tense];
+  const verbInfo = getVerbTenseRule(verb, tense);
+  if (!baseInfo && !verbInfo) return '';
+  const title = baseInfo ? baseInfo.title : getTenseLabel(tense);
+  const usage = baseInfo ? baseInfo.usage : '';
   let ruleHTML = '';
-  const ruleBody = `<div class="rule-title">Vormingsregel</div>
-      <div class="rule-text">${info.rule}</div>
-      ${info.detail ? `<div class="rule-detail">${info.detail}</div>` : ''}`;
-  if (info.endings) {
+  if (verbInfo) {
+    let tableHTML = '';
+    if (verbInfo.endings) {
+      tableHTML = `<table class="conj-table">
+        ${verbInfo.endings.map((e,i) => `<tr><td class="conj-person">${PERSONS[i]}</td><td class="conj-ending">${e}</td></tr>`).join('')}
+      </table>`;
+    } else if (verbInfo.forms) {
+      tableHTML = `<table class="conj-table">
+        ${verbInfo.forms.map((f,i) => f !== null ? `<tr><td class="conj-person">${PERSONS[i]}</td><td class="conj-ending">${f}</td></tr>` : '').join('')}
+      </table>`;
+    }
     ruleHTML = `<div class="rule-box">
-      ${ruleBody}
-      <table class="conj-table">
-        ${info.endings.map((e,i) => `<tr><td class="conj-person">${PERSONS[i]}</td><td class="conj-ending">${e}</td></tr>`).join('')}
-      </table>
-      ${info.endingsNote ? `<div class="rule-note">${info.endingsNote}</div>` : ''}
-    </div>`;
-  } else {
-    ruleHTML = `<div class="rule-box">
-      ${ruleBody}
-      ${info.endingsNote ? `<div class="rule-note">${info.endingsNote}</div>` : ''}
+      <div class="rule-title">Vormingsregel — ${verb.inf}</div>
+      <div class="rule-text">${verbInfo.rule}</div>
+      ${verbInfo.detail ? `<div class="rule-detail">${verbInfo.detail}</div>` : ''}
+      ${tableHTML}
+      ${verbInfo.note ? `<div class="rule-note">${verbInfo.note}</div>` : ''}
     </div>`;
   }
-  el.innerHTML = `
-    <h2>${info.title}</h2>
-    <div class="usage">${info.usage}</div>
+  const ex = verb.examples && verb.examples[tense];
+  const exHTML = ex ? `<div class="example-box">
+    <div class="example-fr">${ex.fr}</div>
+    <div class="example-nl">${ex.nl}</div>
+  </div>` : (baseInfo && baseInfo.example ? `<div class="example-box">
+    <div class="example-fr">${baseInfo.example.fr}</div>
+    <div class="example-nl">${baseInfo.example.nl}</div>
+  </div>` : '');
+  return `<h2>${title} — ${verb.inf}</h2>
+    <div class="usage">${usage}</div>
     ${ruleHTML}
-    <div class="example-box">
-      <div class="example-fr">${info.example.fr}</div>
-      <div class="example-nl">${info.example.nl}</div>
-    </div>
-  `;
+    ${exHTML}`;
+}
+
+function showTenseInfoForVerb(verb, tense) {
+  const el = document.getElementById('tense-info-content');
+  el.innerHTML = renderTenseInfoHTML(verb, tense);
+  showScreen('screen-tense-info');
+}
+
+function showTenseInfoForBlock(blockIdx) {
+  const block = BLOCKS[blockIdx];
+  if (!block) return;
+  const el = document.getElementById('tense-info-content');
+  const tenses = block.tenses || ['present'];
+  const seenTypes = new Set();
+  let html = `<h2>${block.name}</h2><div class="usage">Overzicht van de grammatica in dit blok.</div>`;
+  for (const sub of block.subs) {
+    for (const verbInf of sub.verbs) {
+      const verb = getVerbByInf(verbInf);
+      if (!verb) continue;
+      const typeKey = verb.type + '|' + tenses[0];
+      if (seenTypes.has(typeKey)) continue;
+      seenTypes.add(typeKey);
+      for (const tense of tenses) {
+        const verbInfo = getVerbTenseRule(verb, tense);
+        if (!verbInfo) continue;
+        let tableHTML = '';
+        if (verbInfo.endings) {
+          tableHTML = `<table class="conj-table">
+            ${verbInfo.endings.map((e,i) => `<tr><td class="conj-person">${PERSONS[i]}</td><td class="conj-ending">${e}</td></tr>`).join('')}
+          </table>`;
+        } else if (verbInfo.forms) {
+          tableHTML = `<table class="conj-table">
+            ${verbInfo.forms.map((f,i) => f !== null ? `<tr><td class="conj-person">${PERSONS[i]}</td><td class="conj-ending">${f}</td></tr>` : '').join('')}
+          </table>`;
+        }
+        html += `<div class="rule-box" style="margin-bottom:12px">
+          <div class="rule-title">Vormingsregel — ${verb.inf}</div>
+          <div class="rule-text">${verbInfo.rule}</div>
+          ${verbInfo.detail ? `<div class="rule-detail">${verbInfo.detail}</div>` : ''}
+          ${tableHTML}
+          ${verbInfo.note ? `<div class="rule-note">${verbInfo.note}</div>` : ''}
+        </div>`;
+      }
+    }
+  }
+  el.innerHTML = html;
   showScreen('screen-tense-info');
 }
 
@@ -2384,10 +2511,12 @@ document.addEventListener('click', (e) => {
       showScreen('screen-settings');
       break;
     case 'show-tense-info': {
-      const bi = state.progress.currentBlock;
-      const block = BLOCKS[bi];
-      const tense = block ? (block.tenses || ['present'])[0] : 'present';
-      showTenseInfoScreen(tense);
+      if (session && session.cards && session.cards[session.idx]) {
+        const c = session.cards[session.idx];
+        showTenseInfoForVerb(c.verb, c.tense);
+      } else {
+        showTenseInfoForBlock(state.progress.currentBlock);
+      }
       break;
     }
     case 'close-tense-info':
